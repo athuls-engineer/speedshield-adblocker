@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpeedShield</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <img src="../icons/icon48.png" alt="SpeedShield" class="logo">
+        <div class="brand-text">
+          <h1>SpeedShield</h1>
+          <span class="status-badge active" id="statusBadge">PROTECTED</span>
+        </div>
+      </div>
+      <button class="settings-btn" id="openSettingsBtn" title="Advanced Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Master Shield Toggle -->
+    <div class="toggle-card">
+      <div class="toggle-info">
+        <span class="toggle-title" id="toggleStatusText">Ad & Tracker Shield</span>
+        <span class="toggle-subtitle" id="toggleSubtitle">Active on all web traffic</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="masterToggle" checked>
+        <span class="slider round"></span>
+      </label>
+    </div>
+
+    <!-- Privacy Shield Indicator -->
+    <div class="privacy-status-bar" id="privacyStatusBar">
+      <span class="privacy-shield-icon">🛡️</span>
+      <span class="privacy-shield-text">Identity & Fingerprint Masking: Active</span>
+    </div>
+
+    <!-- Stats Counter Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-value" id="pageBlockedCount">0</span>
+        <span class="stat-label">Blocked This Page</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="totalBlockedCount">0</span>
+        <span class="stat-label">Total All-Time</span>
+      </div>
+    </div>
+
+    <!-- Live Protection Audit Section -->
+    <div class="audit-card">
+      <div class="audit-card-header">
+        <div class="audit-card-title-group">
+          <span class="audit-card-title">⚡ Live Protection Audit</span>
+          <span class="audit-card-subtitle">One-click real-time security & privacy verification</span>
+        </div>
+        <button class="audit-run-btn" id="runPopupAuditBtn">
+          Run Audit
+        </button>
+      </div>
+      <div id="popupAuditResults" class="popup-audit-results" style="display: none;"></div>
+    </div>
+
+    <!-- Site Whitelist Section -->
+    <div class="site-card">
+      <div class="site-header">
+        <span class="site-icon">🌐</span>
+        <span class="current-site" id="currentSiteDomain">Current Website</span>
+      </div>
+      <button class="site-whitelist-btn" id="whitelistBtn">
+        <span class="site-whitelist-text" id="whitelistBtnText">🛡️ Allow Ads on This Site</span>
+      </button>
+    </div>
+
+    <!-- Auto-Updater Status & Manual Action -->
+    <div class="updater-card">
+      <div class="updater-info">
+        <div class="updater-status-line">
+          <span class="pulse-dot"></span>
+          <span class="updater-title">Auto-Updating Filters</span>
+        </div>
+        <span class="updater-mode" id="updaterModeText">Continuous background sync (every 4h)</span>
+        <span class="updater-time" id="lastUpdatedText">Up to date</span>
+      </div>
+      <button class="update-action-btn" id="updateRulesBtn" title="Check for new ad filters now (already auto-updating in background)">
+        <svg id="updateIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <polyline points="1 20 1 14 7 14"></polyline>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+        <span id="updateBtnText">Check Now</span>
+      </button>
+    </div>
+  </div>
+
+  <script src="../content/popup-defuser.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

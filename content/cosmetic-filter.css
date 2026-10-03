@@ -1,0 +1,416 @@
+/* ==========================================================================
+   SpeedShield - Zero-Latency Cosmetic Ad Filter CSS
+   Precise selectors to hide ad slots & video ads without breaking legitimate UI
+   ========================================================================== */
+
+/* Universal Ad Networks Hiding */
+ins.adsbygoogle,
+[id^="google_ads_"],
+[id^="div-gpt-ad"],
+[id^="ad-gpt-"],
+[id^="ad-container"],
+[id*="-ad-container"],
+[id*="_ad_container"],
+[id^="ad_container"],
+[id^="ad-slot"],
+[id*="-ad-slot"],
+[id^="ad-wrapper"],
+[id*="-ad-wrapper"],
+[id^="ad-banner"],
+[id*="-ad-banner"],
+[id^="sticky-ad"],
+[id^="floating-ad"],
+[id^="bottom-ad"],
+[class^="ad-container"],
+[class*=" ad-container"],
+[class*="-ad-container"],
+[class^="ad_container"],
+[class*=" ad_container"],
+[class*="_ad_container"],
+[class^="ad-slot"],
+[class*=" ad-slot"],
+[class*="-ad-slot"],
+[class^="ad-wrapper"],
+[class*=" ad-wrapper"],
+[class*="-ad-wrapper"],
+[class^="ad-banner"],
+[class*=" ad-banner"],
+[class*="-ad-banner"],
+[class^="ad-placement"],
+[class*=" ad-placement"],
+[class^="banner-ad"],
+[class*=" banner-ad"],
+[class^="sticky-ad"],
+[class^="floating-ad"],
+[class^="sponsored-post"],
+[class*=" sponsored-post"],
+[class^="sponsored-card"],
+[class*=" sponsored-card"],
+[class^="sponsored-ad"],
+[class*=" sponsored-ad"],
+[data-ad-slot],
+[data-ad-unit],
+[data-ad-zone],
+[data-ad-client],
+[data-google-query-id],
+[data-ad-format],
+[data-dfp-id],
+.advertisement,
+.advert,
+.ad-box,
+.ad-strip,
+.ad-sidebar,
+.ad-leaderboard,
+.ad-rectangle,
+.ad-skyscraper,
+.ad-unit,
+.adunit,
+.ad-placeholder,
+.adplaceholder,
+.native-ad-unit,
+
+/* Reddit Feed & Comment Ads */
+shreddit-ad-post,
+[data-testid="ad-post"],
+[data-adclicklocation],
+shreddit-comment-tree-ad,
+shreddit-dynamic-ad-link,
+.promotedlink,
+.promoted,
+div[data-promoted="true"],
+div[data-ad="true"],
+aside[aria-label="Advertisement"],
+#advertisement-container,
+[data-testid="advertisement-content"],
+reddit-sidebar-ad,
+
+/* Sponsored recommendation widgets */
+.taboola,
+.trc_rbox_div,
+.trc_related_container,
+[id^="taboola-"],
+.outbrain,
+.ob-widget,
+.ob-cards,
+.OUTBRAIN,
+[id^="outbrain_"],
+.revcontent,
+.mgid-widget,
+.zergnet-widget,
+.content-ad-widget,
+
+/* Ad iframes */
+iframe[id^="google_ads_frame"],
+iframe[id^="aswift_"],
+iframe[src*="doubleclick.net"],
+iframe[src*="googlesyndication.com"],
+iframe[src*="adnxs.com"],
+iframe[src*="smartadserver.com"],
+iframe[src*="criteo.com"],
+iframe[src*="rubiconproject.com"],
+
+/* Annoyances & Anti-Adblock modal backdrops */
+.fc-ab-root,
+.adblock-overlay,
+#adblock-notice,
+.sp_veil,
+.sp_message_container,
+[class*="adblock-modal"],
+[id*="adblock-modal"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  clip: rect(0, 0, 0, 0) !important;
+  overflow: hidden !important;
+}
+
+/* ==========================================================================
+   YouTube Complete Ad Elimination (Video, In-Feed, Promoted, & Modals)
+   ========================================================================== */
+
+/* Feed Ads, Promo Banners, Sidebar Banners & Companion Ads */
+ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
+ytd-rich-item-renderer:has([id*="ad-slot"]),
+ytd-rich-item-renderer:has(#ad),
+ytd-rich-item-renderer:has(ytd-in-feed-ad-layout-renderer),
+ytd-rich-section-renderer:has(ytd-statement-banner-renderer),
+ytd-rich-section-renderer:has(ytd-brand-video-singleton-renderer),
+ytd-item-section-renderer:has(ytd-ad-slot-renderer),
+ytd-item-section-renderer:has(ytd-in-feed-ad-layout-renderer),
+ytd-item-section-renderer:has(ytd-companion-ad-renderer),
+ytd-item-section-renderer:has(ytd-action-companion-ad-renderer),
+ytd-item-section-renderer:has([id*="ad-slot"]),
+ytd-item-section-renderer:has([class*="ad-slot"]),
+ytd-item-section-renderer:has(#fulfilled-layout),
+#secondary ytd-ad-slot-renderer,
+#secondary #items > ytd-ad-slot-renderer,
+#secondary ytd-in-feed-ad-layout-renderer,
+#secondary ytd-companion-ad-renderer,
+#secondary ytd-action-companion-ad-renderer,
+#secondary #fulfilled-layout,
+#secondary [class*="companion-ad"],
+#secondary [class*="ad-slot"],
+ytd-watch-next-secondary-results-renderer #items > ytd-ad-slot-renderer,
+ytd-watch-next-secondary-results-renderer ytd-ad-slot-renderer,
+ytd-watch-next-secondary-results-renderer ytd-in-feed-ad-layout-renderer,
+ytd-watch-next-secondary-results-renderer ytd-companion-ad-renderer,
+ytd-watch-next-secondary-results-renderer ytd-action-companion-ad-renderer,
+ytd-watch-next-secondary-results-renderer #fulfilled-layout,
+ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"],
+ytd-engagement-panel-section-list-renderer:has(ytd-ad-slot-renderer),
+ytd-engagement-panel-section-list-renderer:has(ytd-in-feed-ad-layout-renderer),
+#panels ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"],
+#panels ytd-ad-slot-renderer,
+#below ytd-ad-slot-renderer,
+#below ytd-in-feed-ad-layout-renderer,
+#related ytd-ad-slot-renderer,
+#related ytd-in-feed-ad-layout-renderer,
+#related #items > ytd-ad-slot-renderer,
+#companion,
+div#companion,
+#fulfilled-layout,
+div#fulfilled-layout,
+#sparkles-container,
+div#sparkles-container,
+ytd-ad-slot-renderer,
+ytd-in-feed-ad-layout-renderer,
+ytd-companion-ad-renderer,
+ytd-action-companion-ad-renderer,
+ytd-promoted-video-renderer,
+ytd-promoted-sparkles-web-renderer,
+ytd-banner-promo-renderer,
+ytd-statement-banner-renderer,
+ytd-brand-video-singleton-renderer,
+ytd-player-legacy-desktop-watch-ads-renderer,
+ytd-carousel-ad-renderer,
+ytd-compact-promoted-video-renderer,
+ytd-search-pyv-renderer,
+ytd-video-masthead-ad-v3-renderer,
+ytd-primetime-promo-renderer,
+ytd-merch-shelf-renderer,
+#player-ads,
+#masthead-ad,
+
+/* Video Player Ad Overlays & Interstitials */
+.ytp-ad-module,
+.ytp-ad-overlay-container,
+.ytp-ad-message-container,
+.ytp-ad-player-overlay,
+.ytp-ad-player-overlay-layout,
+.ytp-ad-player-overlay-instream-info,
+.ytp-ad-player-overlay-flyout-cta,
+.ytp-ad-action-interstitial,
+.ytp-ad-feedback-dialog-background,
+.ytp-ad-image-overlay,
+.ytp-ad-preview-container,
+.ytp-ad-persistent-banner,
+.ytp-ad-survey,
+.ytp-ad-button-vm,
+.ytp-ad-badge,
+.ytp-suggested-action-badge,
+.ytp-ad-text {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Anti-Adblock Warning Modals & Phantom Backdrops */
+ytd-enforcement-message-view-model,
+tp-yt-paper-dialog:has(ytd-enforcement-message-view-model),
+tp-yt-iron-overlay-backdrop {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* Ensure closed guide drawer and scrim can NEVER intercept clicks */
+tp-yt-app-drawer:not([opened]),
+tp-yt-app-drawer:not([opened]) #scrim,
+tp-yt-app-drawer:not([opened]) #contentContainer {
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+#scrim {
+  pointer-events: none !important;
+}
+tp-yt-app-drawer[opened] #scrim {
+  pointer-events: auto !important;
+}
+
+/* ==========================================================================
+   YouTube Guaranteed Interactivity & Clickability
+   Ensures all video cards, thumbnails, links, avatars, and titles are 100% clickable
+   ========================================================================== */
+ytd-rich-item-renderer,
+ytd-rich-item-renderer a,
+ytd-rich-item-renderer #thumbnail,
+ytd-rich-item-renderer ytd-thumbnail,
+ytd-rich-item-renderer #video-title-link,
+ytd-rich-item-renderer #avatar-link,
+ytd-rich-item-renderer #content,
+ytd-rich-grid-media,
+yt-lockup-view-model,
+yt-lockup-view-model a,
+yt-lockup-metadata-view-model,
+yt-lockup-metadata-view-model a,
+a.yt-lockup-metadata-view-model__title,
+a.yt-lockup-view-model__content-image {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* ==========================================================================
+   YouTube Split / Half-Screen Mode (Clean Native 2-Column Responsive Layout)
+   Triggers on any half-screen split down to 320px
+   ========================================================================== */
+
+@media (max-width: 1350px) and (min-width: 320px) {
+  /* Set Polymer variables for 2 columns */
+  ytd-rich-grid-renderer {
+    --ytd-rich-grid-items-per-row: 2 !important;
+    --ytd-rich-grid-posts-per-row: 2 !important;
+    --ytd-rich-grid-slim-items-per-row: 2 !important;
+    --ytd-rich-grid-item-margin: 12px !important;
+  }
+
+  /* Make grid contents container a flex wrapping row */
+  ytd-rich-grid-renderer > #contents {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Flatten row wrappers so video cards from all rows flow continuously into 2-column flex */
+  ytd-rich-grid-row,
+  #contents.ytd-rich-grid-row,
+  ytd-rich-grid-row > #contents {
+    display: contents !important;
+  }
+
+  /* Each video card takes exactly 50% width minus margin */
+  ytd-rich-item-renderer {
+    width: calc(50% - 12px) !important;
+    max-width: calc(50% - 12px) !important;
+    min-width: calc(50% - 12px) !important;
+    margin-left: 6px !important;
+    margin-right: 6px !important;
+    margin-bottom: 24px !important;
+    box-sizing: border-box !important;
+    display: block !important;
+  }
+
+  /* Ensure card inner containers fill full card width */
+  ytd-rich-item-renderer #content,
+  ytd-rich-grid-media,
+  yt-lockup-view-model {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Full-width shelves (Posts, Shorts, Trending) */
+  ytd-rich-section-renderer {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 16px 0 !important;
+  }
+}
+
+/* ==========================================================================
+   Speed & GPU Optimization
+   ========================================================================== */
+
+/* Eliminate GPU overhead from heavy ambient lighting on watch page */
+#cinematics,
+#cinematics-renderer {
+  display: none !important;
+}
+
+/* Only protect essential masthead navigation - NEVER touch guide drawer */
+#masthead-container,
+ytd-masthead,
+#masthead {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Restore page scrolling if an anti-adblock modal locked overflow */
+body.fc-ab-root-active,
+body.has-adblock-modal,
+html.has-adblock-modal {
+  overflow: auto !important;
+  position: static !important;
+}
+
+/* ==========================================================================
+   Twitch Complete Ad, Overlay & Lag Elimination
+   Abolishes stream ads, SSAI display overlays, Amazon ads, and buffering
+   ========================================================================== */
+.stream-display-ad__wrapper,
+.tw-ad-container,
+[data-a-target="video-ad-countdown"],
+[data-a-target="video-ad-label"],
+[data-a-target="video-ad-text"],
+[data-a-target="ax-overlay"],
+[data-test-selector="sad-overlay"],
+[data-a-target="player-overlay-ad"],
+[data-test-selector="ad-banner-default-text"],
+[data-a-target="side-nav-ad"],
+div[data-a-target="sponsored-stream"],
+.tw-premium-banner,
+.tw-tower-ad,
+.ad-banner,
+.ad-slot,
+.top-nav__prime,
+.channel-root__right-column [class*="ad-"],
+.video-player__overlay:has([data-a-target*="ad-"]),
+iframe[src*="amazon-adsystem.com"],
+iframe[src*="fls-na.amazon.com"],
+iframe[src*="amazon.com"] {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ensure Twitch video player, chat, and stream controls are 100% interactive and unblocked */
+.video-player__container,
+.video-player video,
+.player-controls,
+.qa-pause-play-button,
+[data-a-target="player-play-pause-button"],
+[data-a-target="player-fullscreen-button"],
+[data-a-target="player-theatre-mode-button"],
+[data-a-target="player-settings-button"],
+[data-a-target="player-volume-slider"] {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpeedShield - Settings & Filters</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="settings-container">
+    <header class="settings-header">
+      <div class="brand">
+        <img src="../icons/icon48.png" alt="SpeedShield" class="logo">
+        <div>
+          <h1>SpeedShield Preferences</h1>
+          <p class="subtitle">Fine-tune your ad blocking, auto-updates, and custom domain filters</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="settings-body">
+      <!-- Section: Auto-Update Frequency -->
+      <section class="card">
+        <h2>🔄 Auto-Update Settings</h2>
+        <p class="card-desc">Keep your ad filters continuously up to date against new ad networks and trackers.</p>
+        <div class="form-row">
+          <label for="updateIntervalSelect">Filter Update Interval:</label>
+          <select id="updateIntervalSelect">
+            <option value="240" selected>Every 4 Hours (Recommended - Always Fresh)</option>
+            <option value="360">Every 6 Hours</option>
+            <option value="720">Every 12 Hours</option>
+            <option value="1440">Every 24 Hours</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="saveIntervalBtn">Save Interval</button>
+        <span class="status-msg" id="intervalStatus"></span>
+      </section>
+
+      <!-- Section: Whitelisted Websites -->
+      <section class="card">
+        <h2>🛡️ Whitelisted Websites</h2>
+        <p class="card-desc">Websites added here will bypass ad blocking and tracking rules.</p>
+        <div class="input-group">
+          <input type="text" id="whitelistInput" placeholder="example.com">
+          <button class="btn btn-primary" id="addWhitelistBtn">Add Domain</button>
+        </div>
+        <ul class="tag-list" id="whitelistContainer">
+          <!-- Populated by JS -->
+        </ul>
+      </section>
+
+      <!-- Section: Privacy & Anti-Fingerprinting Shield -->
+      <section class="card">
+        <h2>🛡️ Privacy & Anti-Fingerprinting Shield</h2>
+        <p class="card-desc">Active protections against identity tracking, device fingerprinting, and analytics beacons.</p>
+        <div class="privacy-grid">
+          <div class="privacy-item">
+            <span class="privacy-badge">PROTECTED</span>
+            <span class="privacy-name">Canvas Fingerprint Noise (Brave-Grade Farbling)</span>
+          </div>
+          <div class="privacy-item">
+            <span class="privacy-badge">PROTECTED</span>
+            <span class="privacy-name">AudioContext Acoustic Signature Scrambler</span>
+          </div>
+          <div class="privacy-item">
+            <span class="privacy-badge">PROTECTED</span>
+            <span class="privacy-name">WebGL GPU Hardware Masking & Pixel Protection</span>
+          </div>
+          <div class="privacy-item">
+            <span class="privacy-badge">PROTECTED</span>
+            <span class="privacy-name">CPU Concurrency & Memory Normalization (8 Cores / 8 GB)</span>
+          </div>
+          <div class="privacy-item">
+            <span class="privacy-badge">PROTECTED</span>
+            <span class="privacy-name">Battery Status API Neutralization</span>
+          </div>
+          <div class="privacy-item">
+            <span class="privacy-badge">PROTECTED</span>
+            <span class="privacy-name">Reddit & Universal Telemetry Silent Beacon Drop</span>
+          </div>
+          <div class="privacy-item">
+            <span class="privacy-badge">PROTECTED</span>
+            <span class="privacy-name">Automation & Bot Signature Shield (Webdriver: false)</span>
+          </div>
+          <div class="privacy-item">
+            <span class="privacy-badge">PROTECTED</span>
+            <span class="privacy-name">Live Threat, Virus & Malware Distribution Blocklist</span>
+          </div>
+          <div class="privacy-item">
+            <span class="privacy-badge">PROTECTED</span>
+            <span class="privacy-name">Twitch Zero-Lag Stream Shield & SSAI Ad Eliminator</span>
+          </div>
+          <div class="privacy-item">
+            <span class="privacy-badge">PROTECTED</span>
+            <span class="privacy-name">YouTube 0ms Native Ad Fast-Forward & Banner Pruner</span>
+          </div>
+          <div class="privacy-item">
+            <span class="privacy-badge">PROTECTED</span>
+            <span class="privacy-name">Reddit Telemetry & Preload Header Neutralizer</span>
+          </div>
+          <div class="privacy-item">
+            <span class="privacy-badge">PROTECTED</span>
+            <span class="privacy-name">Social Pixel Silencer (Meta, TikTok & Twitter/X)</span>
+          </div>
+        </div>
+        <div style="margin-top: 16px; display: flex; gap: 10px; align-items: center;">
+          <button class="btn btn-primary" id="runLiveAuditBtn">⚡ Run Live Protection Audit</button>
+          <span style="font-size: 12px; color: var(--text-muted);">Independent in-browser benchmark of all active shields</span>
+        </div>
+        <div id="liveAuditResults" class="audit-results-card" style="display: none;"></div>
+      </section>
+
+      <!-- Section: Custom Blocked Domains -->
+      <section class="card">
+        <h2>🚫 Custom Blocked Domains</h2>
+        <p class="card-desc">Add specific annoying domains that you want SpeedShield to block everywhere.</p>
+        <div class="input-group">
+          <input type="text" id="customBlockInput" placeholder="annoying-ad-server.com">
+          <button class="btn btn-primary" id="addCustomBlockBtn">Block Domain</button>
+        </div>
+        <ul class="tag-list" id="customBlockContainer">
+          <!-- Populated by JS -->
+        </ul>
+      </section>
+
+      <!-- Section: Data & Stats -->
+      <section class="card">
+        <h2>📊 Statistics & Storage</h2>
+        <p class="card-desc">Manage historical counters and internal rule caches.</p>
+        <div class="stats-row">
+          <div>Total Ads & Trackers Blocked: <strong id="lifetimeStat">0</strong></div>
+          <button class="btn btn-danger" id="resetStatsBtn">Reset Counter</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="../content/popup-defuser.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

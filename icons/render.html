@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="shieldBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="35%" stop-color="#4facfe" />
+      <stop offset="70%" stop-color="#0052d4" />
+      <stop offset="100%" stop-color="#002b80" />
+    </linearGradient>
+
+    <linearGradient id="rimGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+      <stop offset="40%" stop-color="#38bdf8" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.4" />
+    </linearGradient>
+
+    <linearGradient id="innerPlate" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a192f" />
+      <stop offset="50%" stop-color="#0f2b5c" />
+      <stop offset="100%" stop-color="#1e3a8a" />
+    </linearGradient>
+
+    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="40%" stop-color="#e0f2fe" />
+      <stop offset="100%" stop-color="#38bdf8" />
+    </linearGradient>
+
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#00d2ff" flood-opacity="0.4" />
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+
+    <filter id="boltGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  <!-- Outer Shield Base with Glow -->
+  <path d="M 256,36 C 360,36 430,76 448,124 C 458,236 424,374 256,476 C 88,374 54,236 64,124 C 82,76 152,36 256,36 Z"
+        fill="url(#shieldBg)"
+        filter="url(#softGlow)" />
+
+  <!-- Outer Rim Stroke -->
+  <path d="M 256,44 C 354,44 420,82 436,126 C 446,230 414,360 256,458 C 98,360 66,230 76,126 C 92,82 158,44 256,44 Z"
+        fill="none"
+        stroke="url(#rimGrad)"
+        stroke-width="14"
+        stroke-linejoin="round" />
+
+  <!-- Inner Dark Core Plate for High Contrast -->
+  <path d="M 256,76 C 330,76 384,106 396,140 C 404,222 376,328 256,412 C 136,328 108,222 116,140 C 128,106 182,76 256,76 Z"
+        fill="url(#innerPlate)"
+        stroke="#00f2fe"
+        stroke-width="4"
+        stroke-opacity="0.6" />
+
+  <!-- Top Glass Highlight Reflection -->
+  <path d="M 256,86 C 314,86 358,110 376,134 C 336,128 296,124 256,124 C 216,124 176,128 136,134 C 154,110 198,86 256,86 Z"
+        fill="#ffffff"
+        opacity="0.25" />
+
+  <!-- Iconic Lightning Bolt -->
+  <polygon points="278,120 178,270 248,270 234,392 334,242 264,242"
+           fill="url(#boltGrad)"
+           filter="url(#boltGlow)" />
+</svg>
+</body>
+</html>

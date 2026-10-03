@@ -1,0 +1,9 @@
+# SpeedShield Git Ignore
+_metadata/
+*.crx
+*.pem
+*.zip
+.DS_Store
+Thumbs.db
+node_modules/
+*.log
