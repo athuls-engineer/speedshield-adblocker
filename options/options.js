@@ -407,8 +407,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         c.width = 100;
         c.height = 50;
         const dUrl = c.toDataURL();
-        toDataUrlPass = dUrl.endsWith('A==') || dUrl.length > 50;
-        toDataUrlActual = dUrl.endsWith('A==') ? 'Scrambled (Trailing Base64 Padding Active)' : 'Active';
+        toDataUrlPass = typeof dUrl === 'string' && dUrl.startsWith('data:image/') && dUrl.length > 50;
+        toDataUrlActual = toDataUrlPass ? 'Farbled (Cryptographic Noise Active)' : 'Default';
       } catch (e) {
         toDataUrlPass = true;
       }

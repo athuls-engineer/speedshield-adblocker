@@ -46,6 +46,22 @@
     nativeFunctions.add(Function.prototype.toString);
   } catch (e) {}
 
+  // Exclude productivity, messaging, and graphics editing suites from canvas/media farbling
+  // so that screenshot pasting, image sharing, and voice/video calls work with 100% native fidelity
+  const currentHost = (window.location.hostname || '').toLowerCase();
+  const isProductivityOrMediaSite = [
+    'whatsapp.com',
+    'telegram.org',
+    'discord.com',
+    'docs.google.com',
+    'drive.google.com',
+    'figma.com',
+    'canva.com',
+    'photopea.com',
+    'github.com',
+    'gitlab.com'
+  ].some(h => currentHost === h || currentHost.endsWith('.' + h));
+
   // ==========================================================================
   // SECTION 1: Rogue Popup & Clickjack Defuser
   // ==========================================================================
@@ -290,8 +306,8 @@
   }
 
   // 8. Canvas Anti-Fingerprinting & Readback Optimization
-  // Scrambles fingerprinting hashes without CPU-GPU readback bottlenecks or console warnings
-  if (typeof HTMLCanvasElement !== 'undefined') {
+  // Scrambles fingerprinting hashes on test canvases without breaking web apps, screenshots, or file uploads
+  if (typeof HTMLCanvasElement !== 'undefined' && !isProductivityOrMediaSite) {
     // A. Context Optimizer: Sets willReadFrequently by default on 2D contexts
     // This instructs Chromium to optimize readback storage, eliminating the
     // "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true"
@@ -302,7 +318,9 @@
         if (!attributes) {
           attributes = { willReadFrequently: true };
         } else if (attributes.willReadFrequently === undefined) {
-          attributes = Object.assign({}, attributes, { willReadFrequently: true });
+          try {
+            attributes = Object.assign({}, attributes, { willReadFrequently: true });
+          } catch (e) {}
         }
         return originalGetContext.call(this, type, attributes);
       }
@@ -314,53 +332,42 @@
     }, 'getContext');
 
     // B. toDataURL Fingerprint Scrambler:
-    // Randomizes the cryptographic hash (SHA256/MD5) for fingerprinters with 0ms latency
-    // by appending valid base64 trailing padding. Image decoders safely ignore extra bytes
-    // after the file terminator chunk (IEND), guaranteeing 100% flawless image rendering.
+    // Only perturbs tiny test canvases used by fingerprinting libraries (e.g. 200x50, <= 320x160).
+    // Never touches normal user images, photos, or screenshots, and ALWAYS outputs 100% syntactically valid base64!
     const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
     HTMLCanvasElement.prototype.toDataURL = makeNative(function(...args) {
-      const result = originalToDataURL.apply(this, args);
-      try {
-        if (typeof result === 'string' && result.startsWith('data:image/')) {
-          return result + 'A==';
-        }
-      } catch (e) {}
-      return result;
+      if (this.width > 0 && this.width <= 320 && this.height > 0 && this.height <= 160) {
+        try {
+          const ctx = originalGetContext.call(this, '2d');
+          if (ctx && ctx.getImageData && ctx.putImageData) {
+            const x = this.width - 1;
+            const y = this.height - 1;
+            const p = ctx.getImageData(x, y, 1, 1);
+            if (p && p.data) {
+              p.data[0] = (p.data[0] === 255 ? 254 : p.data[0] + 1);
+              ctx.putImageData(p, x, y);
+            }
+          }
+        } catch (e) {}
+      }
+      return originalToDataURL.apply(this, args);
     }, 'toDataURL');
 
-    // C. toBlob Fingerprint Scrambler:
-    if (HTMLCanvasElement.prototype.toBlob) {
-      const originalToBlob = HTMLCanvasElement.prototype.toBlob;
-      HTMLCanvasElement.prototype.toBlob = makeNative(function(callback, type, quality) {
-        if (typeof callback !== 'function') {
-          return originalToBlob.apply(this, arguments);
-        }
-        try {
-          const dataUrl = this.toDataURL(type, quality);
-          fetch(dataUrl)
-            .then(res => res.blob())
-            .then(blob => callback(blob))
-            .catch(() => originalToBlob.apply(this, arguments));
-        } catch (e) {
-          originalToBlob.apply(this, arguments);
-        }
-      }, 'toBlob');
-    }
+    // Note: toBlob is kept 100% native C++ to prevent any corruption of user screenshots,
+    // image uploads, and clipboard pastes on web applications like WhatsApp, Discord, or canvas editors.
   }
 
   // D. getImageData Pixel Farbler:
-  // Subtly alters 1 bit on isolated pixels when fingerprinting libraries inspect raw pixel arrays.
-  if (typeof CanvasRenderingContext2D !== 'undefined') {
+  // Only applies to small test canvases (<= 320x160) to protect user images, diagrams, and screenshots
+  if (typeof CanvasRenderingContext2D !== 'undefined' && !isProductivityOrMediaSite) {
     const originalGetImageData = CanvasRenderingContext2D.prototype.getImageData;
     CanvasRenderingContext2D.prototype.getImageData = makeNative(function(sx, sy, sw, sh, settings) {
       const imgData = originalGetImageData.apply(this, arguments);
       try {
-        if (imgData && imgData.data) {
+        if (imgData && imgData.data && (sw <= 320 && sh <= 160)) {
           const d = imgData.data;
-          const len = d.length;
-          // Perturb 1 byte every 64 pixels slightly (+/- 1)
-          for (let i = 0; i < len; i += 64) {
-            d[i] = (d[i] === 255 ? 254 : d[i] + 1);
+          if (d.length > 0) {
+            d[0] = (d[0] === 255 ? 254 : d[0] + 1);
           }
         }
       } catch (e) {}
@@ -371,7 +378,7 @@
   // 9. AudioContext Fingerprint Scrambler (Sub-harmonic micro-noise)
   // Audio fingerprinting tests extract FFT data from an OfflineAudioContext.
   // Injecting sub-140dB micro-noise randomizes the hash without any audible sound distortion.
-  if (typeof AudioBuffer !== 'undefined') {
+  if (typeof AudioBuffer !== 'undefined' && !isProductivityOrMediaSite) {
     const originalGetChannelData = AudioBuffer.prototype.getChannelData;
     AudioBuffer.prototype.getChannelData = makeNative(function(channel) {
       const data = originalGetChannelData.apply(this, arguments);
@@ -859,7 +866,7 @@
   // ==========================================================================
   try {
     const OriginalRTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection;
-    if (OriginalRTCPeerConnection) {
+    if (OriginalRTCPeerConnection && !isProductivityOrMediaSite) {
       const sanitizedRTCPeerConnection = function(config, constraints) {
         if (config && config.iceServers && Array.isArray(config.iceServers)) {
           config.iceServers = config.iceServers.filter(srv => {
