@@ -1,0 +1,54 @@
+[
+  {
+    "id": 6001,
+    "priority": 2,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "transform": {
+          "queryTransform": {
+            "removeParams": [
+              "utm_source",
+              "utm_medium",
+              "utm_campaign",
+              "utm_term",
+              "utm_content",
+              "utm_id",
+              "utm_reader",
+              "fbclid",
+              "gclid",
+              "gclsrc",
+              "dclid",
+              "msclkid",
+              "mc_eid",
+              "mc_cid",
+              "_hsenc",
+              "_hsmi",
+              "igshid",
+              "si",
+              "ref_src",
+              "twclid",
+              "zanpid",
+              "yclid",
+              "_openstat",
+              "wickedid",
+              "oly_enc_id",
+              "rb_clickid",
+              "vero_conv",
+              "vero_id",
+              "sc_cid",
+              "mkt_tok"
+            ]
+          }
+        }
+      }
+    },
+    "condition": {
+      "urlFilter": "|http*",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame"
+      ]
+    }
+  }
+]

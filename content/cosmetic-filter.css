@@ -413,4 +413,122 @@ iframe[src*="amazon.com"] {
   z-index: 1 !important;
 }
 
+/* ==========================================================================
+   SpeedShield - Universal Cookie Consent, GDPR & Annoyance Annihilator
+   Collapses annoying consent popups, soft paywalls, and push prompts
+   ========================================================================== */
+
+/* OneTrust / CookiePro */
+#onetrust-banner-sdk,
+#onetrust-consent-sdk,
+.onetrust-pc-dark-filter,
+#onetrust-policy,
+.onetrust-cookie-notice,
+
+/* Cookiebot */
+#CookiebotWidget,
+#CybotCookiebotDialog,
+#CybotCookiebotDialogBodyUnderlay,
+#CybotCookiebotDialogBody,
+
+/* Didomi */
+#didomi-host,
+.didomi-popup-backdrop,
+#didomi-notice,
+#didomi-consent-popup,
+
+/* Quantcast Choice */
+.qc-cmp2-container,
+.qc-cmp-ui-container,
+.qc-cmp2-ui,
+#qc-cmp2-main,
+
+/* Usercentrics */
+#usercentrics-root,
+div[id^="usercentrics-"],
+#usercentrics-cmp-ui,
+
+/* Iubenda */
+#iubenda-cs-banner,
+.iubenda-cs-overlay,
+.iubenda-cs-cookie-policy,
+
+/* Complianz */
+.cmplz-cookiebanner,
+.cmplz-soft-cookiewall,
+#cmplz-cookiebanner-container,
+
+/* Osano */
+.osano-cm-window,
+.osano-cm-dialog,
+.osano-cm-view,
+
+/* TrustArc / TRUSTe */
+#truste-consent-track,
+.truste_box_overlay,
+#truste-consent-button,
+.trustarc-banner-container,
+
+/* Civic Cookie Control */
+#ccc,
+#ccc-overlay,
+.ccc-notify,
+
+/* Generic & High-Prevalence Consent Modals */
+[id*="cookie-banner" i],
+[class*="cookie-banner" i],
+[id*="cookie-consent" i],
+[class*="cookie-consent" i],
+[id*="cookie-notice" i],
+[class*="cookie-notice" i],
+[id*="cookie-popup" i],
+[class*="cookie-popup" i],
+[id*="cookie-modal" i],
+[class*="cookie-modal" i],
+[id*="cookie-bar" i],
+[class*="cookie-bar" i],
+[id*="consent-banner" i],
+[class*="consent-banner" i],
+[id*="consent-modal" i],
+[class*="consent-modal" i],
+[id*="gdpr-banner" i],
+[class*="gdpr-banner" i],
+[id*="gdpr-consent" i],
+[class*="gdpr-consent" i],
+div[aria-label*="cookie consent" i],
+div[aria-label*="cookie policy" i],
+
+/* Newsletter, Subscription & Push Notification Prompts */
+[id*="newsletter-modal" i],
+[class*="newsletter-popup" i],
+[class*="newsletter-modal" i],
+[id*="push-notification-modal" i],
+[class*="push-prompt" i],
+[id*="onesignal-slidedown-dialog"],
+#webpushr-prompt,
+#subscribers-prompt,
+.sp-modal-content {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Force body and document root scrolling even if a modal locked overflow */
+html[class*="cookie" i],
+body[class*="cookie" i],
+html[class*="modal-open" i],
+body[class*="modal-open" i],
+html.didomi-popup-open,
+body.didomi-popup-open,
+body.has-cookie-banner,
+html.has-cookie-banner {
+  overflow: auto !important;
+  position: static !important;
+}
+
 

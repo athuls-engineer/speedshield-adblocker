@@ -36,6 +36,32 @@
         <span class="status-msg" id="intervalStatus"></span>
       </section>
 
+      <!-- Section: Protection Shield Modules -->
+      <section class="card">
+        <h2>🛡️ Protection Shield Modules</h2>
+        <p class="card-desc">Configure granular protection engines across network and browser layers.</p>
+        <div class="module-row">
+          <div class="module-info">
+            <span class="module-title">🍪 Cookie Consent & GDPR Annoyance Blocker</span>
+            <span class="module-desc">Automatically collapses cookie banners, GDPR prompts, and newsletter overlays without breaking page scrolling.</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="cookieShieldToggle" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+        <div class="module-row" style="margin-top: 12px;">
+          <div class="module-info">
+            <span class="module-title">🔗 URL Tracking Query Parameter Cleaner</span>
+            <span class="module-desc">Strips tracking IDs (fbclid, gclid, utm_source, msclkid) directly at the C++ network core before navigation.</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="urlCleanerToggle" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </section>
+
       <!-- Section: Whitelisted Websites -->
       <section class="card">
         <h2>🛡️ Whitelisted Websites</h2>
@@ -121,6 +147,33 @@
         <ul class="tag-list" id="customBlockContainer">
           <!-- Populated by JS -->
         </ul>
+      </section>
+
+      <!-- Section: Custom Element Filters -->
+      <section class="card">
+        <h2>🎨 Custom Element Filters (CSS Selectors)</h2>
+        <p class="card-desc">Permanently hide stubborn page elements or zapped items across the web using CSS selectors.</p>
+        <div class="input-group">
+          <input type="text" id="customFilterInput" placeholder="###ad-slot or .sponsored-banner">
+          <button class="btn btn-primary" id="addCustomFilterBtn">Add Filter</button>
+        </div>
+        <ul class="tag-list" id="customFilterContainer">
+          <!-- Populated by JS -->
+        </ul>
+      </section>
+
+      <!-- Section: Backup & Portability -->
+      <section class="card">
+        <h2>💾 Settings Backup & Portability</h2>
+        <p class="card-desc">Export your whitelist, custom filters, and blocked domains to a JSON backup or restore them anytime.</p>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <button class="btn btn-primary" id="exportSettingsBtn">Export Settings (JSON)</button>
+          <label class="btn btn-secondary" style="cursor: pointer; margin: 0;">
+            Import Settings (JSON)
+            <input type="file" id="importSettingsFile" accept=".json" style="display: none;">
+          </label>
+          <span class="status-msg" id="backupStatus"></span>
+        </div>
       </section>
 
       <!-- Section: Data & Stats -->

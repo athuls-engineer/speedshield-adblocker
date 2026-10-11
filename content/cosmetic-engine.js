@@ -11,7 +11,7 @@
 
   try {
     // Check if extension is enabled or site is whitelisted
-    chrome.storage.local.get(['shield_enabled', 'whitelist', 'dynamic_cosmetic_selectors'], (data) => {
+    chrome.storage.local.get(['shield_enabled', 'whitelist', 'dynamic_cosmetic_selectors', 'custom_cosmetic_filters'], (data) => {
       if (chrome.runtime.lastError || !data) return;
       if (data.shield_enabled === false) return;
 
@@ -21,11 +21,11 @@
         return;
       }
 
-      initCosmeticEngine(data.dynamic_cosmetic_selectors || []);
+      initCosmeticEngine(data.dynamic_cosmetic_selectors || [], data.custom_cosmetic_filters || []);
     });
   } catch (e) {}
 
-  function initCosmeticEngine(dynamicSelectors = []) {
+  function initCosmeticEngine(dynamicSelectors = [], initialCustomFilters = []) {
     let blockedCount = 0;
     const isYouTube = window.location.hostname.includes('youtube.com');
     const isTwitch = window.location.hostname.includes('twitch.tv');
@@ -341,5 +341,253 @@
         }
       }, 250);
     }
+
+    // ==========================================================================
+    // SECTION: Custom Cosmetic Filters & Interactive Element Zapper
+    // ==========================================================================
+
+    function updateCustomFilterCSS(selectors) {
+      if (!selectors || selectors.length === 0) {
+        const existing = document.getElementById('speedshield-custom-filter-css');
+        if (existing) existing.remove();
+        return;
+      }
+      let style = document.getElementById('speedshield-custom-filter-css');
+      if (!style) {
+        style = document.createElement('style');
+        style.id = 'speedshield-custom-filter-css';
+        (document.head || document.documentElement).appendChild(style);
+      }
+      style.textContent = selectors.join(',\n') + ` {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }`;
+    }
+
+    // Apply custom filters on initialization
+    if (initialCustomFilters && initialCustomFilters.length > 0) {
+      updateCustomFilterCSS(initialCustomFilters);
+    }
+
+    // Listen for storage changes to custom cosmetic filters
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && changes.custom_cosmetic_filters) {
+        updateCustomFilterCSS(changes.custom_cosmetic_filters.newValue || []);
+      }
+    });
+
+    // Interactive Element Zapper
+    let isZapperActive = false;
+    let zapperHighlight = null;
+    let zapperTooltip = null;
+    let currentTarget = null;
+    let currentSelector = '';
+
+    function generateSelector(el) {
+      if (!el || el === document.body || el === document.documentElement) return '';
+      if (el.id && !/\d{4,}/.test(el.id)) {
+        return '#' + CSS.escape(el.id);
+      }
+      const tag = el.tagName.toLowerCase();
+      if (el.className && typeof el.className === 'string') {
+        const classes = el.className.trim().split(/\s+/).filter(c => c && !c.includes(':') && !/\d{4,}/.test(c));
+        if (classes.length > 0) {
+          return tag + '.' + CSS.escape(classes[0]);
+        }
+      }
+      if (el.getAttribute('data-testid')) {
+        return `${tag}[data-testid="${CSS.escape(el.getAttribute('data-testid'))}"]`;
+      }
+      if (el.getAttribute('aria-label')) {
+        return `${tag}[aria-label="${CSS.escape(el.getAttribute('aria-label'))}"]`;
+      }
+      const parent = el.parentElement;
+      if (parent && parent !== document.body) {
+        const parentSel = generateSelector(parent);
+        if (parentSel) {
+          return `${parentSel} > ${tag}`;
+        }
+      }
+      return tag;
+    }
+
+    function createZapperUI() {
+      if (!zapperHighlight) {
+        zapperHighlight = document.createElement('div');
+        zapperHighlight.id = 'speedshield-zapper-highlight';
+        zapperHighlight.style.cssText = `
+          position: fixed !important;
+          pointer-events: none !important;
+          z-index: 2147483646 !important;
+          border: 2px solid #ef4444 !important;
+          background: rgba(239, 68, 68, 0.25) !important;
+          border-radius: 4px !important;
+          box-shadow: 0 0 14px rgba(239, 68, 68, 0.6) !important;
+          display: none !important;
+          transition: top 0.05s ease, left 0.05s ease, width 0.05s ease, height 0.05s ease !important;
+        `;
+        document.documentElement.appendChild(zapperHighlight);
+      }
+
+      if (!zapperTooltip) {
+        zapperTooltip = document.createElement('div');
+        zapperTooltip.id = 'speedshield-zapper-tooltip';
+        zapperTooltip.style.cssText = `
+          position: fixed !important;
+          pointer-events: none !important;
+          z-index: 2147483647 !important;
+          background: #090d16 !important;
+          border: 1px solid #00d2ff !important;
+          color: #f0f6fc !important;
+          padding: 6px 12px !important;
+          border-radius: 6px !important;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+          font-size: 11px !important;
+          font-weight: 600 !important;
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8) !important;
+          display: none !important;
+          white-space: nowrap !important;
+        `;
+        document.documentElement.appendChild(zapperTooltip);
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position: fixed !important;
+        top: 20px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 2147483647 !important;
+        background: linear-gradient(135deg, #090d16, #162138) !important;
+        border: 1px solid #10b981 !important;
+        color: #f0f6fc !important;
+        padding: 10px 20px !important;
+        border-radius: 10px !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
+      `;
+      toast.textContent = msg;
+      document.documentElement.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
+    }
+
+    function onZapperMouseMove(e) {
+      if (!isZapperActive) return;
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      if (!el || el === zapperHighlight || el === zapperTooltip || el === document.body || el === document.documentElement) {
+        if (zapperHighlight) zapperHighlight.style.display = 'none';
+        if (zapperTooltip) zapperTooltip.style.display = 'none';
+        return;
+      }
+
+      currentTarget = el;
+      currentSelector = generateSelector(el);
+      const rect = el.getBoundingClientRect();
+
+      zapperHighlight.style.top = rect.top + 'px';
+      zapperHighlight.style.left = rect.left + 'px';
+      zapperHighlight.style.width = rect.width + 'px';
+      zapperHighlight.style.height = rect.height + 'px';
+      zapperHighlight.style.display = 'block';
+
+      zapperTooltip.textContent = `${currentSelector}  •  Click to Zap | Esc to cancel`;
+      const tipTop = rect.top > 35 ? rect.top - 32 : rect.bottom + 8;
+      const tipLeft = Math.max(10, Math.min(window.innerWidth - 300, rect.left));
+      zapperTooltip.style.top = tipTop + 'px';
+      zapperTooltip.style.left = tipLeft + 'px';
+      zapperTooltip.style.display = 'block';
+    }
+
+    function onZapperClick(e) {
+      if (!isZapperActive) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (currentTarget && currentSelector) {
+        currentTarget.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+        currentTarget.style.transform = 'scale(0.85)';
+        currentTarget.style.opacity = '0';
+        const doomed = currentTarget;
+        setTimeout(() => { doomed.style.display = 'none'; }, 200);
+
+        chrome.storage.local.get(['custom_cosmetic_filters'], (res) => {
+          const filters = res.custom_cosmetic_filters || [];
+          if (!filters.includes(currentSelector)) {
+            filters.push(currentSelector);
+            chrome.storage.local.set({ custom_cosmetic_filters: filters });
+          }
+        });
+
+        reportBlocked(1);
+        showToast(`⚡ Element zapped & permanently blocked: ${currentSelector}`);
+      }
+
+      deactivateZapper();
+    }
+
+    function onZapperKeyDown(e) {
+      if (e.key === 'Escape' && isZapperActive) {
+        deactivateZapper();
+        showToast('⚡ Element Zapper cancelled');
+      }
+    }
+
+    function onZapperContextMenu(e) {
+      if (isZapperActive) {
+        e.preventDefault();
+        deactivateZapper();
+      }
+    }
+
+    function activateZapper() {
+      if (isZapperActive) {
+        deactivateZapper();
+        return;
+      }
+      isZapperActive = true;
+      createZapperUI();
+      document.documentElement.style.cursor = 'crosshair';
+
+      window.addEventListener('mousemove', onZapperMouseMove, { passive: true, capture: true });
+      window.addEventListener('click', onZapperClick, { capture: true });
+      window.addEventListener('keydown', onZapperKeyDown, { capture: true });
+      window.addEventListener('contextmenu', onZapperContextMenu, { capture: true });
+      showToast('⚡ Element Zapper Active: Hover and click any element to zap it (Esc to exit)');
+    }
+
+    function deactivateZapper() {
+      isZapperActive = false;
+      document.documentElement.style.cursor = '';
+      if (zapperHighlight) zapperHighlight.style.display = 'none';
+      if (zapperTooltip) zapperTooltip.style.display = 'none';
+      currentTarget = null;
+      currentSelector = '';
+
+      window.removeEventListener('mousemove', onZapperMouseMove, { capture: true });
+      window.removeEventListener('click', onZapperClick, { capture: true });
+      window.removeEventListener('keydown', onZapperKeyDown, { capture: true });
+      window.removeEventListener('contextmenu', onZapperContextMenu, { capture: true });
+    }
+
+    // Message listener for Element Zapper
+    chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+      if (msg.action === 'activate_element_picker') {
+        activateZapper();
+        sendResponse({ status: 'active' });
+      }
+      return true;
+    });
   }
 })();

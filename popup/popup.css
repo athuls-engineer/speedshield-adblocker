@@ -214,18 +214,18 @@ input:checked + .slider:before {
   transform: translateX(20px);
 }
 
-/* Stats Grid */
+/* Stats Grid (3 columns) */
 .stats-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 }
 
 .stat-card {
   background: var(--bg-card);
   backdrop-filter: blur(10px);
   border: 1px solid var(--border-color);
-  padding: 12px 10px;
+  padding: 10px 6px;
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -234,19 +234,117 @@ input:checked + .slider:before {
 }
 
 .stat-value {
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--accent-cyan);
   line-height: 1.2;
 }
 
 .stat-label {
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 9px;
+  font-weight: 600;
   color: var(--text-muted);
-  margin-top: 4px;
+  margin-top: 3px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+}
+
+/* Quick Actions Grid */
+.actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.action-btn.zapper-btn {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.05));
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.action-btn.zapper-btn:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.15));
+  border-color: #ef4444;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
+}
+
+.action-btn.whitelisted {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.btn-icon {
+  font-size: 13px;
+}
+
+/* Feature Toggles Chips */
+.chips-container {
+  display: flex;
+  gap: 8px;
+}
+
+.feature-chip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.feature-chip:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-main);
+}
+
+.feature-chip.active {
+  background: rgba(0, 210, 255, 0.08);
+  border-color: rgba(0, 210, 255, 0.3);
+  color: var(--accent-cyan);
+}
+
+.chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #64748b;
+  transition: all 0.2s ease;
+}
+
+.feature-chip.active .chip-dot {
+  background: #00d2ff;
+  box-shadow: 0 0 6px rgba(0, 210, 255, 0.6);
 }
 
 /* Live Protection Audit Section */

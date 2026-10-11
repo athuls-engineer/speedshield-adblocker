@@ -9,9 +9,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const toggleSubtitle = document.getElementById('toggleSubtitle');
   const pageBlockedCount = document.getElementById('pageBlockedCount');
   const totalBlockedCount = document.getElementById('totalBlockedCount');
-  const currentSiteDomain = document.getElementById('currentSiteDomain');
+  const customFiltersCount = document.getElementById('customFiltersCount');
   const whitelistBtn = document.getElementById('whitelistBtn');
   const whitelistBtnText = document.getElementById('whitelistBtnText');
+  const whitelistIcon = document.getElementById('whitelistIcon');
+  const activateZapperBtn = document.getElementById('activateZapperBtn');
+  const cookieChip = document.getElementById('cookieChip');
+  const urlCleanerChip = document.getElementById('urlCleanerChip');
   const lastUpdatedText = document.getElementById('lastUpdatedText');
   const updateRulesBtn = document.getElementById('updateRulesBtn');
   const updateBtnText = document.getElementById('updateBtnText');
@@ -38,14 +42,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       const urlObj = new URL(tab.url);
       if (urlObj.protocol.startsWith('http')) {
         currentDomain = urlObj.hostname.toLowerCase();
-        currentSiteDomain.textContent = currentDomain;
       } else {
         currentDomain = '';
-        currentSiteDomain.textContent = 'Chrome Internal Page';
-        whitelistBtn.style.display = 'none';
+        if (whitelistBtn) whitelistBtn.style.display = 'none';
+        if (activateZapperBtn) activateZapperBtn.style.display = 'none';
       }
     } catch (e) {
-      currentSiteDomain.textContent = 'Active Tab';
+      currentDomain = '';
     }
   }
 
@@ -66,6 +69,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Counters
       pageBlockedCount.textContent = res.tabBlocked || 0;
       totalBlockedCount.textContent = (res.totalBlocked || 0).toLocaleString();
+      if (customFiltersCount) {
+        customFiltersCount.textContent = (res.customFiltersCount || 0).toLocaleString();
+      }
+
+      // Feature Chips
+      if (cookieChip) {
+        cookieChip.classList.toggle('active', res.cookieShieldEnabled !== false);
+      }
+      if (urlCleanerChip) {
+        urlCleanerChip.classList.toggle('active', res.urlCleanerEnabled !== false);
+      }
 
       // Whitelist state for this site
       if (currentDomain) {
@@ -101,13 +115,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function updateWhitelistUI(isWhitelisted) {
+    if (!whitelistBtn) return;
     if (isWhitelisted) {
       whitelistBtn.classList.add('whitelisted');
-      whitelistBtnText.textContent = '❌ Whitelisted (Click to Protect)';
+      whitelistBtnText.textContent = 'Blocked on Site';
+      if (whitelistIcon) whitelistIcon.textContent = '❌';
     } else {
       whitelistBtn.classList.remove('whitelisted');
-      whitelistBtnText.textContent = '🛡️ Allow Ads on This Site';
+      whitelistBtnText.textContent = 'Allow on Site';
+      if (whitelistIcon) whitelistIcon.textContent = '🛡️';
     }
+  }
+
+  // Activate Element Zapper button
+  if (activateZapperBtn) {
+    activateZapperBtn.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ action: 'activate_zapper' }, () => {
+        window.close(); // Close popup so user can zap immediately
+      });
+    });
+  }
+
+  // Feature Toggles Chips Listeners
+  if (cookieChip) {
+    cookieChip.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ action: 'toggle_cookie_shield' }, (res) => {
+        if (res) {
+          cookieChip.classList.toggle('active', res.cookieShieldEnabled);
+        }
+      });
+    });
+  }
+
+  if (urlCleanerChip) {
+    urlCleanerChip.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ action: 'toggle_url_cleaner' }, (res) => {
+        if (res) {
+          urlCleanerChip.classList.toggle('active', res.urlCleanerEnabled);
+        }
+      });
+    });
   }
 
   function formatLastUpdated(timestamp, dynamicCount, updateIntervalMinutes) {

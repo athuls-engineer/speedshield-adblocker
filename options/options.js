@@ -18,13 +18,43 @@ document.addEventListener('DOMContentLoaded', async () => {
   const lifetimeStat = document.getElementById('lifetimeStat');
   const resetStatsBtn = document.getElementById('resetStatsBtn');
 
+  const cookieShieldToggle = document.getElementById('cookieShieldToggle');
+  const urlCleanerToggle = document.getElementById('urlCleanerToggle');
+
+  const customFilterInput = document.getElementById('customFilterInput');
+  const addCustomFilterBtn = document.getElementById('addCustomFilterBtn');
+  const customFilterContainer = document.getElementById('customFilterContainer');
+
+  const exportSettingsBtn = document.getElementById('exportSettingsBtn');
+  const importSettingsFile = document.getElementById('importSettingsFile');
+  const backupStatus = document.getElementById('backupStatus');
+
   // Load Initial Settings
   const data = await chrome.storage.local.get([
     'update_interval_minutes',
     'whitelist',
     'custom_blocked_domains',
-    'total_blocked'
+    'custom_cosmetic_filters',
+    'total_blocked',
+    'cookie_shield_enabled',
+    'url_cleaner_enabled'
   ]);
+
+  if (cookieShieldToggle) {
+    cookieShieldToggle.checked = data.cookie_shield_enabled !== false;
+    cookieShieldToggle.addEventListener('change', async () => {
+      await chrome.storage.local.set({ cookie_shield_enabled: cookieShieldToggle.checked });
+      chrome.runtime.sendMessage({ action: 'toggle_cookie_shield' });
+    });
+  }
+
+  if (urlCleanerToggle) {
+    urlCleanerToggle.checked = data.url_cleaner_enabled !== false;
+    urlCleanerToggle.addEventListener('change', async () => {
+      await chrome.storage.local.set({ url_cleaner_enabled: urlCleanerToggle.checked });
+      chrome.runtime.sendMessage({ action: 'toggle_url_cleaner' });
+    });
+  }
 
   if (data.update_interval_minutes) {
     updateIntervalSelect.value = String(data.update_interval_minutes);
@@ -34,9 +64,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let whitelist = data.whitelist || [];
   let customBlocked = data.custom_blocked_domains || [];
+  let customFilters = data.custom_cosmetic_filters || [];
 
   renderWhitelist();
   renderCustomBlocked();
+  renderCustomFilters();
 
   // Save Update Interval
   saveIntervalBtn.addEventListener('click', async () => {
@@ -142,6 +174,147 @@ document.addEventListener('DOMContentLoaded', async () => {
       addCustomBlockBtn.click();
     }
   });
+
+  // Custom Element Filters (CSS Selectors) Logic
+  function renderCustomFilters() {
+    if (!customFilterContainer) return;
+    customFilterContainer.innerHTML = '';
+    if (customFilters.length === 0) {
+      customFilterContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 12px;">No custom element filters yet. Use Element Zapper (Alt+Z) or add selectors above.</span>';
+      return;
+    }
+    customFilters.forEach(sel => {
+      const li = document.createElement('li');
+      li.className = 'tag-item';
+      li.innerHTML = `
+        <span>${escapeHtml(sel)}</span>
+        <button class="tag-remove" data-filter="${escapeHtml(sel)}" title="Remove">&times;</button>
+      `;
+      customFilterContainer.appendChild(li);
+    });
+
+    customFilterContainer.querySelectorAll('.tag-remove').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const filterToRemove = e.currentTarget.dataset.filter;
+        customFilters = customFilters.filter(f => f !== filterToRemove);
+        await chrome.storage.local.set({ custom_cosmetic_filters: customFilters });
+        renderCustomFilters();
+      });
+    });
+  }
+
+  if (addCustomFilterBtn && customFilterInput) {
+    addCustomFilterBtn.addEventListener('click', async () => {
+      let sel = customFilterInput.value.trim();
+      if (!sel) return;
+      if (sel.startsWith('##')) sel = sel.slice(2);
+      if (!customFilters.includes(sel)) {
+        customFilters.push(sel);
+        await chrome.storage.local.set({ custom_cosmetic_filters: customFilters });
+        renderCustomFilters();
+      }
+      customFilterInput.value = '';
+    });
+
+    customFilterInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        addCustomFilterBtn.click();
+      }
+    });
+  }
+
+  // Settings Backup & Portability Logic
+  if (exportSettingsBtn) {
+    exportSettingsBtn.addEventListener('click', async () => {
+      const allSettings = await chrome.storage.local.get(null);
+      const exportData = {
+        version: '1.1.0',
+        exportedAt: new Date().toISOString(),
+        whitelist: allSettings.whitelist || [],
+        custom_blocked_domains: allSettings.custom_blocked_domains || [],
+        custom_cosmetic_filters: allSettings.custom_cosmetic_filters || [],
+        cookie_shield_enabled: allSettings.cookie_shield_enabled !== false,
+        url_cleaner_enabled: allSettings.url_cleaner_enabled !== false,
+        shield_enabled: allSettings.shield_enabled !== false,
+        update_interval_minutes: allSettings.update_interval_minutes || 1440
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `speedshield-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      if (backupStatus) {
+        backupStatus.textContent = 'Settings exported successfully!';
+        setTimeout(() => { backupStatus.textContent = ''; }, 3000);
+      }
+    });
+  }
+
+  if (importSettingsFile) {
+    importSettingsFile.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          if (imported && typeof imported === 'object') {
+            const updates = {};
+            if (Array.isArray(imported.whitelist)) {
+              updates.whitelist = imported.whitelist;
+              whitelist = imported.whitelist;
+            }
+            if (Array.isArray(imported.custom_blocked_domains)) {
+              updates.custom_blocked_domains = imported.custom_blocked_domains;
+              customBlocked = imported.custom_blocked_domains;
+            }
+            if (Array.isArray(imported.custom_cosmetic_filters)) {
+              updates.custom_cosmetic_filters = imported.custom_cosmetic_filters;
+              customFilters = imported.custom_cosmetic_filters;
+            }
+            if (typeof imported.cookie_shield_enabled === 'boolean') {
+              updates.cookie_shield_enabled = imported.cookie_shield_enabled;
+              if (cookieShieldToggle) cookieShieldToggle.checked = imported.cookie_shield_enabled;
+            }
+            if (typeof imported.url_cleaner_enabled === 'boolean') {
+              updates.url_cleaner_enabled = imported.url_cleaner_enabled;
+              if (urlCleanerToggle) urlCleanerToggle.checked = imported.url_cleaner_enabled;
+            }
+            if (typeof imported.update_interval_minutes === 'number') {
+              updates.update_interval_minutes = imported.update_interval_minutes;
+              if (updateIntervalSelect) updateIntervalSelect.value = String(imported.update_interval_minutes);
+            }
+
+            await chrome.storage.local.set(updates);
+            chrome.runtime.sendMessage({ action: 'force_update_rules' });
+
+            renderWhitelist();
+            renderCustomBlocked();
+            renderCustomFilters();
+
+            if (backupStatus) {
+              backupStatus.textContent = 'Settings imported successfully!';
+              setTimeout(() => { backupStatus.textContent = ''; }, 3000);
+            }
+          }
+        } catch (err) {
+          if (backupStatus) {
+            backupStatus.textContent = 'Invalid JSON file!';
+            setTimeout(() => { backupStatus.textContent = ''; }, 3000);
+          }
+        }
+        importSettingsFile.value = '';
+      };
+      reader.readAsText(file);
+    });
+  }
 
   // Reset Stats
   resetStatsBtn.addEventListener('click', async () => {

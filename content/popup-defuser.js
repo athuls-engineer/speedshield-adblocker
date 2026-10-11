@@ -824,4 +824,113 @@
       attachPreloadObserver();
     }
   }
+
+  // ==========================================================================
+  // SECTION 7: WebRTC IP Leak Shield (LAN & Public IP Harvesting Defense)
+  // Neutralizes rogue STUN tracking and masks internal private LAN addresses
+  // ==========================================================================
+  try {
+    const OriginalRTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection;
+    if (OriginalRTCPeerConnection) {
+      const sanitizedRTCPeerConnection = function(config, constraints) {
+        if (config && config.iceServers && Array.isArray(config.iceServers)) {
+          config.iceServers = config.iceServers.filter(srv => {
+            const urls = Array.isArray(srv.urls) ? srv.urls : [srv.urls || ''];
+            return !urls.some(u => String(u).includes('track') || String(u).includes('analytics') || String(u).includes('fingerprint'));
+          });
+        }
+        const pc = new OriginalRTCPeerConnection(config, constraints);
+        const originalAddEventListener = pc.addEventListener;
+        pc.addEventListener = function(type, listener, options) {
+          if (type === 'icecandidate') {
+            const wrappedListener = function(event) {
+              if (event && event.candidate && event.candidate.candidate) {
+                try {
+                  const raw = event.candidate.candidate;
+                  const cleanCandidate = raw.replace(/(192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)/g, '0.0.0.0');
+                  Object.defineProperty(event.candidate, 'candidate', { value: cleanCandidate, configurable: true });
+                } catch (e) {}
+              }
+              return listener.apply(this, arguments);
+            };
+            return originalAddEventListener.call(this, type, wrappedListener, options);
+          }
+          return originalAddEventListener.apply(this, arguments);
+        };
+        return pc;
+      };
+      sanitizedRTCPeerConnection.prototype = OriginalRTCPeerConnection.prototype;
+      window.RTCPeerConnection = makeNative(sanitizedRTCPeerConnection, 'RTCPeerConnection');
+      if (window.webkitRTCPeerConnection) {
+        window.webkitRTCPeerConnection = window.RTCPeerConnection;
+      }
+    }
+  } catch (e) {}
+
+  // ==========================================================================
+  // SECTION 8: Global Scriptlet Defuser (Zero-Crash Native Stubs for 15+ Trackers)
+  // Prevents websites from throwing unhandled TypeErrors when trackers are blocked
+  // ==========================================================================
+  try {
+    const noopFn = makeNative(function() { return noopFn; }, 'noop');
+
+    // Google Analytics & Google Tag Manager
+    window.ga = window.ga || noopFn;
+    window._gaq = window._gaq || [];
+    window._gaq.push = window._gaq.push || noopFn;
+    window.GoogleAnalyticsObject = window.GoogleAnalyticsObject || 'ga';
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push = window.dataLayer.push || function() { return Array.prototype.push.apply(this, arguments); };
+    window.google_tag_manager = window.google_tag_manager || {};
+
+    // Google AdSense
+    window.adsbygoogle = window.adsbygoogle || [];
+    window.adsbygoogle.push = window.adsbygoogle.push || noopFn;
+
+    // Meta (Facebook) Pixel
+    window.fbq = window.fbq || noopFn;
+    window._fbq = window._fbq || window.fbq;
+
+    // Twitter / X Pixel
+    window.twq = window.twq || noopFn;
+
+    // TikTok Pixel
+    window.ttq = window.ttq || { track: noopFn, page: noopFn, load: noopFn, identify: noopFn };
+
+    // LinkedIn Insight Tag
+    window.lintrk = window.lintrk || noopFn;
+
+    // Pinterest Tag
+    window.pintrk = window.pintrk || noopFn;
+
+    // Snapchat Pixel
+    window.snaptrq = window.snaptrq || noopFn;
+
+    // Microsoft Clarity
+    window.clarity = window.clarity || noopFn;
+
+    // Hotjar
+    window.hj = window.hj || noopFn;
+    window._hjSettings = window._hjSettings || { hjid: 0, hjsv: 0 };
+
+    // Amplitude & Segment
+    window.amplitude = window.amplitude || { getInstance: () => ({ init: noopFn, logEvent: noopFn, setUserId: noopFn }) };
+    window.analytics = window.analytics || { track: noopFn, page: noopFn, identify: noopFn };
+
+    // Mixpanel
+    window.mixpanel = window.mixpanel || { init: noopFn, track: noopFn, identify: noopFn, people: { set: noopFn } };
+  } catch (e) {}
+
+  // ==========================================================================
+  // SECTION 9: Hyperlink Ping & Click Tracking Stripper
+  // Eliminates async beacon audits on link clicks
+  // ==========================================================================
+  try {
+    window.addEventListener('click', (e) => {
+      const link = e.target && e.target.closest ? e.target.closest('a') : null;
+      if (link && link.hasAttribute('ping')) {
+        link.removeAttribute('ping');
+      }
+    }, true);
+  } catch (e) {}
 })();

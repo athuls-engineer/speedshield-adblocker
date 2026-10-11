@@ -6,7 +6,7 @@
 const DEFAULT_UPDATE_INTERVAL_MINUTES = 240; // Auto-updates every 4 hours automatically
 const DYNAMIC_RULE_START_ID = 10000;
 const MAX_DYNAMIC_RULES = 5000;
-const STATIC_RULESET_IDS = ['ruleset_ad_servers', 'ruleset_trackers', 'ruleset_popups'];
+const STATIC_RULESET_IDS = ['ruleset_ad_servers', 'ruleset_trackers', 'ruleset_popups', 'ruleset_annoyances', 'ruleset_url_cleaner'];
 
 // Curated live threat, malware, virus, tracker, and ad feeds for autonomous updates
 const REMOTE_RULE_SOURCES = [
@@ -96,6 +96,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   await initializeStorage();
   await setupAlarm();
   await syncWhitelistRules();
+  setupContextMenus();
   // Autonomous initial background update
   checkAndPerformUpdate(false).catch(() => {});
 });
@@ -104,6 +105,7 @@ chrome.runtime.onStartup.addListener(async () => {
   console.log('[SpeedShield] Browser started. Ensuring auto-updater is active...');
   await setupAlarm();
   await syncWhitelistRules();
+  setupContextMenus();
 
   // If last update was > 4 hours ago, auto-update immediately in background
   const data = await chrome.storage.local.get(['last_updated', 'update_interval_minutes']);
@@ -113,6 +115,68 @@ chrome.runtime.onStartup.addListener(async () => {
     checkAndPerformUpdate(false).catch(() => {});
   }
 });
+
+// Context Menus & Keyboard Shortcut Handler
+function setupContextMenus() {
+  if (!chrome.contextMenus) return;
+  try {
+    chrome.contextMenus.removeAll(() => {
+      chrome.contextMenus.create({
+        id: 'speedshield_zap_element',
+        title: '⚡ SpeedShield: Zap element on this page (Alt+Z)',
+        contexts: ['all']
+      });
+      chrome.contextMenus.create({
+        id: 'speedshield_toggle_whitelist',
+        title: '🛡️ SpeedShield: Toggle whitelist for this site',
+        contexts: ['all']
+      });
+    });
+  } catch (e) {}
+}
+
+if (chrome.contextMenus && chrome.contextMenus.onClicked) {
+  chrome.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === 'speedshield_zap_element' && tab && tab.id) {
+      chrome.tabs.sendMessage(tab.id, { action: 'activate_element_picker', mode: 'zapper' });
+    } else if (info.menuItemId === 'speedshield_toggle_whitelist' && tab && tab.url) {
+      try {
+        const url = new URL(tab.url);
+        toggleDomainWhitelist(url.hostname.toLowerCase(), tab.id);
+      } catch (e) {}
+    }
+  });
+}
+
+if (chrome.commands && chrome.commands.onCommand) {
+  chrome.commands.onCommand.addListener((command) => {
+    if (command === 'toggle_zapper') {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0] && tabs[0].id) {
+          chrome.tabs.sendMessage(tabs[0].id, { action: 'activate_element_picker', mode: 'zapper' });
+        }
+      });
+    }
+  });
+}
+
+async function toggleDomainWhitelist(domain, tabId) {
+  if (!domain) return;
+  const { whitelist = [] } = await chrome.storage.local.get(['whitelist']);
+  const index = whitelist.indexOf(domain);
+  let isWhitelisted = false;
+  if (index >= 0) {
+    whitelist.splice(index, 1);
+  } else {
+    whitelist.push(domain);
+    isWhitelisted = true;
+  }
+  await chrome.storage.local.set({ whitelist });
+  await syncWhitelistRules();
+  if (tabId) {
+    chrome.tabs.reload(tabId);
+  }
+}
 
 // Periodic Alarm Listener for Autonomous Updates
 chrome.alarms.onAlarm.addListener((alarm) => {
@@ -127,22 +191,30 @@ async function initializeStorage() {
     'shield_enabled',
     'whitelist',
     'total_blocked',
+    'total_zapped',
     'last_updated',
     'dynamic_rules_count',
     'update_interval_minutes',
     'dynamic_cosmetic_selectors',
-    'custom_blocked_domains'
+    'custom_blocked_domains',
+    'custom_cosmetic_filters',
+    'cookie_shield_enabled',
+    'url_cleaner_enabled'
   ]);
 
   const defaults = {};
   if (data.shield_enabled === undefined) defaults.shield_enabled = true;
   if (!data.whitelist) defaults.whitelist = [];
   if (data.total_blocked === undefined) defaults.total_blocked = 0;
+  if (data.total_zapped === undefined) defaults.total_zapped = 0;
   if (!data.last_updated) defaults.last_updated = Date.now();
   if (data.dynamic_rules_count === undefined) defaults.dynamic_rules_count = 0;
   if (!data.update_interval_minutes) defaults.update_interval_minutes = DEFAULT_UPDATE_INTERVAL_MINUTES;
   defaults.dynamic_cosmetic_selectors = MODERN_COSMETIC_SELECTORS;
   if (!data.custom_blocked_domains) defaults.custom_blocked_domains = [];
+  if (!data.custom_cosmetic_filters) defaults.custom_cosmetic_filters = [];
+  if (data.cookie_shield_enabled === undefined) defaults.cookie_shield_enabled = true;
+  if (data.url_cleaner_enabled === undefined) defaults.url_cleaner_enabled = true;
 
   if (Object.keys(defaults).length > 0) {
     await chrome.storage.local.set(defaults);
@@ -231,17 +303,38 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
 
 // Synchronize Whitelist rules and master shield state
 async function syncWhitelistRules() {
-  const { whitelist = [], shield_enabled = true } = await chrome.storage.local.get(['whitelist', 'shield_enabled']);
+  const { 
+    whitelist = [], 
+    shield_enabled = true,
+    cookie_shield_enabled = true,
+    url_cleaner_enabled = true
+  } = await chrome.storage.local.get(['whitelist', 'shield_enabled', 'cookie_shield_enabled', 'url_cleaner_enabled']);
   
-  // 1. Toggle Static Rulesets
+  // 1. Toggle Static Rulesets based on master shield and feature states
   try {
     if (!shield_enabled) {
       await chrome.declarativeNetRequest.updateEnabledRulesets({
         disableRulesetIds: STATIC_RULESET_IDS
       });
     } else {
+      const enableRules = ['ruleset_ad_servers', 'ruleset_trackers', 'ruleset_popups'];
+      const disableRules = [];
+
+      if (cookie_shield_enabled !== false) {
+        enableRules.push('ruleset_annoyances');
+      } else {
+        disableRules.push('ruleset_annoyances');
+      }
+
+      if (url_cleaner_enabled !== false) {
+        enableRules.push('ruleset_url_cleaner');
+      } else {
+        disableRules.push('ruleset_url_cleaner');
+      }
+
       await chrome.declarativeNetRequest.updateEnabledRulesets({
-        enableRulesetIds: STATIC_RULESET_IDS
+        enableRulesetIds: enableRules,
+        disableRulesetIds: disableRules
       });
     }
   } catch (err) {
@@ -430,12 +523,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const tabId = message.tabId;
     const count = tabBlockedCounts.get(tabId) || 0;
     chrome.storage.local.get(
-      ['shield_enabled', 'whitelist', 'total_blocked', 'last_updated', 'dynamic_rules_count', 'update_interval_minutes'],
+      ['shield_enabled', 'whitelist', 'total_blocked', 'total_zapped', 'last_updated', 'dynamic_rules_count', 'update_interval_minutes', 'cookie_shield_enabled', 'url_cleaner_enabled', 'custom_cosmetic_filters'],
       (data) => {
         sendResponse({
           tabBlocked: count,
           totalBlocked: data.total_blocked || 0,
+          totalZapped: data.total_zapped || 0,
           shieldEnabled: data.shield_enabled !== false,
+          cookieShieldEnabled: data.cookie_shield_enabled !== false,
+          urlCleanerEnabled: data.url_cleaner_enabled !== false,
+          customFiltersCount: (data.custom_cosmetic_filters || []).length,
           whitelist: data.whitelist || [],
           lastUpdated: data.last_updated || Date.now(),
           dynamicCount: data.dynamic_rules_count || 0,
@@ -452,6 +549,38 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       await chrome.storage.local.set({ shield_enabled: newState });
       await syncWhitelistRules();
       sendResponse({ shieldEnabled: newState });
+    });
+    return true;
+  }
+
+  if (message.action === 'toggle_cookie_shield') {
+    chrome.storage.local.get(['cookie_shield_enabled'], async (data) => {
+      const newState = data.cookie_shield_enabled === false ? true : false;
+      await chrome.storage.local.set({ cookie_shield_enabled: newState });
+      await syncWhitelistRules();
+      sendResponse({ cookieShieldEnabled: newState });
+    });
+    return true;
+  }
+
+  if (message.action === 'toggle_url_cleaner') {
+    chrome.storage.local.get(['url_cleaner_enabled'], async (data) => {
+      const newState = data.url_cleaner_enabled === false ? true : false;
+      await chrome.storage.local.set({ url_cleaner_enabled: newState });
+      await syncWhitelistRules();
+      sendResponse({ urlCleanerEnabled: newState });
+    });
+    return true;
+  }
+
+  if (message.action === 'activate_zapper') {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0] && tabs[0].id) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: 'activate_element_picker', mode: 'zapper' });
+        sendResponse({ success: true });
+      } else {
+        sendResponse({ success: false });
+      }
     });
     return true;
   }

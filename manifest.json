@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SpeedShield - Ultra Fast Ad & Popup Blocker",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "High-speed Manifest V3 ad blocker. Blocks banners, video ads, trackers, and popups while accelerating website loading.",
   "icons": {
     "16": "icons/icon16.png",
@@ -42,6 +42,16 @@
         "id": "ruleset_popups",
         "enabled": true,
         "path": "rules/popups-redirects.json"
+      },
+      {
+        "id": "ruleset_annoyances",
+        "enabled": true,
+        "path": "rules/annoyances.json"
+      },
+      {
+        "id": "ruleset_url_cleaner",
+        "enabled": true,
+        "path": "rules/url-cleaner.json"
       }
     ]
   },
@@ -63,12 +73,20 @@
   ],
   "permissions": [
     "declarativeNetRequest",
-    "declarativeNetRequestFeedback",
     "storage",
     "alarms",
     "activeTab",
-    "tabs"
+    "tabs",
+    "contextMenus"
   ],
+  "commands": {
+    "toggle_zapper": {
+      "suggested_key": {
+        "default": "Alt+Z"
+      },
+      "description": "Activate SpeedShield Element Zapper"
+    }
+  },
   "host_permissions": [
     "<all_urls>"
   ]
