@@ -232,7 +232,8 @@ ytd-merch-shelf-renderer,
 /* Anti-Adblock Warning Modals & Phantom Backdrops */
 ytd-enforcement-message-view-model,
 tp-yt-paper-dialog:has(ytd-enforcement-message-view-model),
-tp-yt-iron-overlay-backdrop {
+body:has(ytd-enforcement-message-view-model) tp-yt-iron-overlay-backdrop,
+ytd-app:has(ytd-enforcement-message-view-model) tp-yt-iron-overlay-backdrop {
   display: none !important;
   pointer-events: none !important;
 }
