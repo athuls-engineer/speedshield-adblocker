@@ -245,7 +245,7 @@ tp-yt-app-drawer:not([opened]) #contentContainer {
   pointer-events: none !important;
   visibility: hidden !important;
 }
-#scrim {
+ytd-app tp-yt-app-drawer:not([opened]) #scrim {
   pointer-events: none !important;
 }
 tp-yt-app-drawer[opened] #scrim {
@@ -519,17 +519,16 @@ div[aria-label*="cookie policy" i],
   overflow: hidden !important;
 }
 
-/* Force body and document root scrolling even if a modal locked overflow */
+/* Force body and document root scrolling when a cookie modal locks overflow */
 html[class*="cookie" i],
 body[class*="cookie" i],
-html[class*="modal-open" i],
-body[class*="modal-open" i],
 html.didomi-popup-open,
 body.didomi-popup-open,
 body.has-cookie-banner,
-html.has-cookie-banner {
+html.has-cookie-banner,
+body[class*="sp-message-open"],
+html[class*="sp-message-open"] {
   overflow: auto !important;
-  position: static !important;
 }
 
 

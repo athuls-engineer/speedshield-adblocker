@@ -25,7 +25,6 @@
               "_hsenc",
               "_hsmi",
               "igshid",
-              "si",
               "ref_src",
               "twclid",
               "zanpid",
@@ -45,6 +44,29 @@
     },
     "condition": {
       "urlFilter": "|http*",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 6002,
+    "priority": 3,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "transform": {
+          "queryTransform": {
+            "removeParams": [
+              "si"
+            ]
+          }
+        }
+      }
+    },
+    "condition": {
+      "regexFilter": "^https?://([a-z0-9-]+\\.)?(youtube\\.com|youtu\\.be)/",
       "resourceTypes": [
         "main_frame",
         "sub_frame"

@@ -53,13 +53,17 @@
     'whatsapp.com',
     'telegram.org',
     'discord.com',
+    'slack.com',
+    'teams.microsoft.com',
     'docs.google.com',
     'drive.google.com',
     'figma.com',
     'canva.com',
     'photopea.com',
     'github.com',
-    'gitlab.com'
+    'gitlab.com',
+    'miro.com',
+    'notion.so'
   ].some(h => currentHost === h || currentHost.endsWith('.' + h));
 
   // ==========================================================================
@@ -71,26 +75,62 @@
     'adsco.re', 'adcash', 'adsterra', 'propellerads', 'hilltopads',
     'clickadu', 'trafficjunky', 'outbrain', 'taboola', 'revcontent',
     'doubleclick', 'pagead2', 'yieldlove', 'bet365', '1xbet',
-    '/click/', '/pop/', '/jump/', 'utm_medium=popup', 'format=popunder'
+    '/ad/click', '/adclick', 'adclick.', '/popunder', 'popunder.',
+    'utm_medium=popup', 'format=popunder'
+  ];
+
+  // Whitelist of authentication, OAuth, federated login, and payment gateways worldwide
+  const TRUSTED_AUTH_PAYMENT_DOMAINS = [
+    'accounts.google.com',
+    'appleid.apple.com',
+    'login.microsoftonline.com',
+    'login.live.com',
+    'github.com',
+    'gitlab.com',
+    'facebook.com',
+    'twitter.com',
+    'x.com',
+    'auth0.com',
+    'okta.com',
+    'paypal.com',
+    'stripe.com',
+    'checkout.stripe.com',
+    'pay.google.com',
+    'klarna.com',
+    'razorpay.com',
+    'square.com',
+    'cash.app',
+    'authorize.net',
+    'braintreegateway.com'
   ];
 
   const originalWindowOpen = window.open;
 
-  // Track user click timestamps to detect simulated/synthetic clicks
-  let lastTrustedClickTime = 0;
-  window.addEventListener('click', (e) => {
+  // Track user interaction timestamps across clicks, taps, keypresses, and form submits
+  let lastTrustedInteractionTime = 0;
+  const markTrustedInteraction = (e) => {
     if (e.isTrusted) {
-      lastTrustedClickTime = Date.now();
+      lastTrustedInteractionTime = Date.now();
     }
-  }, true);
+  };
+
+  window.addEventListener('click', markTrustedInteraction, true);
+  window.addEventListener('pointerdown', markTrustedInteraction, true);
+  window.addEventListener('keydown', markTrustedInteraction, true);
+  window.addEventListener('submit', markTrustedInteraction, true);
 
   // Override window.open
   window.open = makeNative(function(url, target, features) {
     const now = Date.now();
-    const timeSinceClick = now - lastTrustedClickTime;
+    const timeSinceInteraction = now - lastTrustedInteractionTime;
 
     const urlStr = String(url || '').toLowerCase();
     const isSuspicious = SUSPICIOUS_PATTERNS.some(p => urlStr.includes(p));
+
+    // Check if destination is a recognized OAuth or Payment flow
+    const isAuthOrPayment = TRUSTED_AUTH_PAYMENT_DOMAINS.some(domain => {
+      return urlStr.includes('://' + domain) || urlStr.includes('.' + domain);
+    });
 
     const isSameOrigin = !urlStr ||
       urlStr === 'about:blank' ||
@@ -100,17 +140,21 @@
 
     const isYouTube = (window.location.hostname || '').includes('youtube.com');
 
-    // On YouTube or for same-origin navigation, never block legitimate calls
-    if ((isYouTube || isSameOrigin) && !isSuspicious) {
+    // Always allow legitimate OAuth, Payment, YouTube, or Same-Origin calls if not suspicious
+    if ((isAuthOrPayment || isYouTube || isSameOrigin) && !isSuspicious) {
       return originalWindowOpen.apply(this, arguments);
     }
 
-    // If opened without a trusted user click in the last 1500ms, or matches popup ad pattern
-    if (isSuspicious || timeSinceClick > 1500) {
-      if (isSameOrigin && !isSuspicious && timeSinceClick <= 3000) {
-        return originalWindowOpen.apply(this, arguments);
-      }
-      console.warn('[SpeedShield] Blocked unprompted popup attempt:', url);
+    // Explicitly block known rogue ad networks
+    if (isSuspicious) {
+      console.warn('[SpeedShield] Blocked rogue ad popup attempt:', url);
+      return null;
+    }
+
+    // For third-party windows: require trusted user interaction within 4000ms
+    // (allows async fetch before window.open commonly used in modern SPAs)
+    if (timeSinceInteraction > 4000) {
+      console.warn('[SpeedShield] Blocked unprompted background popup attempt:', url);
       return null;
     }
 
@@ -241,24 +285,27 @@
     }
   } catch (e) {}
 
-  // 6. Network Jitter Normalization (neutralizes connection timing fingerprinting)
+  // 6. Network Jitter Normalization (neutralizes connection timing fingerprinting via Proxy)
   try {
-    if ('connection' in Navigator.prototype) {
-      const mockConn = {
-        rtt: 50,
-        downlink: 10,
-        effectiveType: '4g',
-        saveData: false,
-        addEventListener: function() {},
-        removeEventListener: function() {},
-        dispatchEvent: function() { return false; },
-        onchange: null
-      };
-      Object.defineProperty(Navigator.prototype, 'connection', {
-        get: makeNative(function() { return mockConn; }, 'get connection'),
-        configurable: true,
-        enumerable: true
-      });
+    if (typeof navigator !== 'undefined' && 'connection' in Navigator.prototype) {
+      const realConn = navigator.connection;
+      if (realConn) {
+        const connectionProxy = new Proxy(realConn, {
+          get(target, prop, receiver) {
+            if (prop === 'rtt') return 50;
+            if (prop === 'downlink') return 10;
+            if (prop === 'effectiveType') return '4g';
+            if (prop === 'saveData') return false;
+            const val = Reflect.get(target, prop, receiver);
+            return typeof val === 'function' ? val.bind(target) : val;
+          }
+        });
+        Object.defineProperty(Navigator.prototype, 'connection', {
+          get: makeNative(function() { return connectionProxy; }, 'get connection'),
+          configurable: true,
+          enumerable: true
+        });
+      }
     }
   } catch (e) {}
 
@@ -287,7 +334,9 @@
       proto.readPixels = makeNative(function(x, y, width, height, format, type, pixels) {
         originalReadPixels.apply(this, arguments);
         try {
-          if (pixels && pixels.length) {
+          // Fingerprinting tests are typically tiny test squares (<= 32x32)
+          // Never perturb buffers on games, 3D apps, or productivity sites to preserve raycasting & color-picking
+          if (pixels && pixels.length && width <= 32 && height <= 32 && !isProductivityOrMediaSite) {
             const step = Math.max(4, Math.floor(pixels.length / 80));
             for (let i = 0; i < pixels.length; i += step) {
               pixels[i] = (pixels[i] === 255 ? 254 : pixels[i] + 1);
@@ -909,14 +958,36 @@
   try {
     const noopFn = makeNative(function() { return noopFn; }, 'noop');
 
-    // Google Analytics & Google Tag Manager
+    // Google Analytics & Google Tag Manager & gtag
     window.ga = window.ga || noopFn;
     window._gaq = window._gaq || [];
     window._gaq.push = window._gaq.push || noopFn;
     window.GoogleAnalyticsObject = window.GoogleAnalyticsObject || 'ga';
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push = window.dataLayer.push || function() { return Array.prototype.push.apply(this, arguments); };
+    window.gtag = window.gtag || makeNative(function() {
+      if (window.dataLayer && typeof window.dataLayer.push === 'function') {
+        window.dataLayer.push(arguments);
+      }
+      return noopFn;
+    }, 'gtag');
     window.google_tag_manager = window.google_tag_manager || {};
+
+    // CMP & Consent Managers (OneTrust / Optanon / Cookiebot)
+    // Prevents enterprise sites from crashing or hanging waiting for CMP callbacks
+    window.OneTrust = window.OneTrust || {
+      Init: noopFn,
+      IsAlertBoxClosed: () => true,
+      OnConsentChanged: noopFn,
+      ToggleInfoDisplay: noopFn,
+      Close: noopFn
+    };
+    window.OptanonWrapper = window.OptanonWrapper || noopFn;
+    window.Cookiebot = window.Cookiebot || { consent: { necessary: true, preferences: true, statistics: false, marketing: false }, show: noopFn, hide: noopFn };
+
+    // Criteo & Retargeting
+    window.criteo_q = window.criteo_q || [];
+    window.criteo_q.push = window.criteo_q.push || noopFn;
 
     // Google AdSense
     window.adsbygoogle = window.adsbygoogle || [];

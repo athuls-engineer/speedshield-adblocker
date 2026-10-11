@@ -213,8 +213,15 @@
         for (let i = 0; i < wrappers.length; i++) {
           const w = wrappers[i];
           if (w.dataset.speedshieldPurged) continue;
+          // Never hide elements containing interactive controls or forms
+          if (w.querySelector('input, button, select, textarea, form, canvas')) continue;
+
           const text = (w.textContent || '').trim();
-          if (text === '' || text.toLowerCase() === 'advertisement' || text.toLowerCase() === 'sponsored') {
+          const isExplicitAdLabel = text.toLowerCase() === 'advertisement' || text.toLowerCase() === 'sponsored';
+          // If empty, verify it doesn't contain legitimate images or user content
+          const isEmptyPlaceholder = text === '' && !w.querySelector('img, picture, svg, video, a');
+
+          if (isExplicitAdLabel || isEmptyPlaceholder) {
             w.dataset.speedshieldPurged = 'true';
             w.style.setProperty('display', 'none', 'important');
             newlyBlocked++;
