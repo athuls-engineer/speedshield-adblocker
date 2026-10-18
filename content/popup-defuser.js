@@ -46,8 +46,8 @@
     nativeFunctions.add(Function.prototype.toString);
   } catch (e) {}
 
-  // Exclude productivity, messaging, and graphics editing suites from canvas/media farbling
-  // so that screenshot pasting, image sharing, and voice/video calls work with 100% native fidelity
+  // Exclude productivity, AI, messaging, and graphics editing suites from canvas/media farbling
+  // so that screenshot pasting, image sharing, voice/video calls, and TTS speech work with 100% native fidelity
   const currentHost = (window.location.hostname || '').toLowerCase();
   const isProductivityOrMediaSite = [
     'whatsapp.com',
@@ -55,6 +55,8 @@
     'discord.com',
     'slack.com',
     'teams.microsoft.com',
+    'zoom.us',
+    'meet.google.com',
     'docs.google.com',
     'drive.google.com',
     'figma.com',
@@ -63,7 +65,20 @@
     'github.com',
     'gitlab.com',
     'miro.com',
-    'notion.so'
+    'notion.so',
+    'character.ai',
+    'c.ai',
+    'chatgpt.com',
+    'openai.com',
+    'claude.ai',
+    'gemini.google.com',
+    'poe.com',
+    'perplexity.ai',
+    'elevenlabs.io',
+    'spotify.com',
+    'netflix.com',
+    'twitch.tv',
+    'youtube.com'
   ].some(h => currentHost === h || currentHost.endsWith('.' + h));
 
   // ==========================================================================
@@ -357,22 +372,10 @@
   // 8. Canvas Anti-Fingerprinting & Readback Optimization
   // Scrambles fingerprinting hashes on test canvases without breaking web apps, screenshots, or file uploads
   if (typeof HTMLCanvasElement !== 'undefined' && !isProductivityOrMediaSite) {
-    // A. Context Optimizer: Sets willReadFrequently by default on 2D contexts
-    // This instructs Chromium to optimize readback storage, eliminating the
-    // "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true"
-    // warning completely, while accelerating any legit canvas read operations.
+    // A. Context Optimizer & WebGL Hook
+    // Keeps 2D canvas GPU hardware acceleration and ClearType subpixel rendering 100% native
     const originalGetContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = makeNative(function(type, attributes) {
-      if (type === '2d') {
-        if (!attributes) {
-          attributes = { willReadFrequently: true };
-        } else if (attributes.willReadFrequently === undefined) {
-          try {
-            attributes = Object.assign({}, attributes, { willReadFrequently: true });
-          } catch (e) {}
-        }
-        return originalGetContext.call(this, type, attributes);
-      }
       const ctx = originalGetContext.apply(this, arguments);
       if (ctx && (type === 'webgl' || type === 'experimental-webgl' || type === 'webgl2')) {
         maskWebGLContext(ctx);
@@ -425,14 +428,15 @@
   }
 
   // 9. AudioContext Fingerprint Scrambler (Sub-harmonic micro-noise)
-  // Audio fingerprinting tests extract FFT data from an OfflineAudioContext.
-  // Injecting sub-140dB micro-noise randomizes the hash without any audible sound distortion.
+  // Scrambles synthetic fingerprinting tests (<= 5000 samples) without altering real AI speech, TTS, music, or game audio
   if (typeof AudioBuffer !== 'undefined' && !isProductivityOrMediaSite) {
     const originalGetChannelData = AudioBuffer.prototype.getChannelData;
     AudioBuffer.prototype.getChannelData = makeNative(function(channel) {
       const data = originalGetChannelData.apply(this, arguments);
       try {
-        if (!this._speedshieldAudioFarbled) {
+        // Only farble tiny synthetic fingerprinting buffers (<= 5000 samples)
+        // Real speech, TTS (Character.ai/ElevenLabs), music, and games use large buffers (>= 22050 samples)
+        if (this.length > 0 && this.length <= 5000 && !this._speedshieldAudioFarbled) {
           this._speedshieldAudioFarbled = true;
           for (let i = 0; i < data.length; i += 100) {
             data[i] += Math.sin(i) * 1e-7;
@@ -447,8 +451,10 @@
       AudioBuffer.prototype.copyFromChannel = makeNative(function(destination, channelNumber, startInChannel) {
         originalCopyFromChannel.apply(this, arguments);
         try {
-          for (let i = 0; i < destination.length; i += 100) {
-            destination[i] += Math.sin(i) * 1e-7;
+          if (this.length > 0 && this.length <= 5000) {
+            for (let i = 0; i < destination.length; i += 100) {
+              destination[i] += Math.sin(i) * 1e-7;
+            }
           }
         } catch (e) {}
       }, 'copyFromChannel');
