@@ -276,25 +276,48 @@
           newlyBlocked++;
         }
 
-        // B. Locate the actual Character Chat Header and collapse any empty banner slot above it
-        // The character header bar displays the character creator handle "By @" or contains character info
+        // B. Robust Character Header Bar Finder
+        // In modern Tailwind React SPAs, headers are <div>s with utility classes, not semantic <header>s.
+        // We find the creator handle 'By @' (e.g. 'By @roylath724') and walk up to the chat header bar container.
         let chatHeader = null;
-        const candidateHeaders = document.querySelectorAll('header, [role="banner"], div[class*="header"]');
-        for (let h = 0; h < candidateHeaders.length; h++) {
-          const hdr = candidateHeaders[h];
-          if (hdr.closest('[data-testid*="chat-message"], [class*="message"], [class*="bubble"]')) continue;
-          if (hdr.querySelector('textarea, input, form')) continue;
-          if ((hdr.textContent && hdr.textContent.includes('By @')) || (hdr.querySelector('img') && hdr.querySelector('button'))) {
-            chatHeader = hdr;
-            break;
+        const allByAt = document.querySelectorAll('*');
+        for (let i = 0; i < allByAt.length; i++) {
+          const el = allByAt[i];
+          if (el.children.length === 0 && el.textContent && el.textContent.includes('By @')) {
+            let curr = el;
+            while (curr && curr.parentElement && curr.parentElement !== document.body && curr.parentElement !== document.documentElement) {
+              const p = curr.parentElement;
+              if (p.querySelector('[data-testid*="chat-message"]') || p.clientHeight > 300 || p.offsetHeight > 300) {
+                chatHeader = curr;
+                break;
+              }
+              curr = p;
+            }
+            if (chatHeader) break;
+          }
+        }
+
+        // Fallback: search for header/nav/div with avatar and buttons
+        if (!chatHeader) {
+          const candidateHeaders = document.querySelectorAll('header, [role="banner"], nav, div');
+          for (let h = 0; h < candidateHeaders.length; h++) {
+            const hdr = candidateHeaders[h];
+            if (hdr.closest('[data-testid*="chat-message"], [class*="message"], [class*="bubble"]')) continue;
+            if (hdr.querySelector('textarea, input, form')) continue;
+            if (hdr.querySelector('img') && hdr.querySelector('button') && (hdr.clientHeight >= 35 && hdr.clientHeight <= 120)) {
+              chatHeader = hdr;
+              break;
+            }
           }
         }
 
         if (chatHeader) {
-          // Collapse any banner slot sitting immediately before the chat header in the column
+          const headerRect = chatHeader.getBoundingClientRect();
+
+          // 1. Collapse all siblings sitting directly before the chat header
           let prev = chatHeader.previousElementSibling;
           while (prev) {
-            if (!prev.dataset.speedshieldPurged && !prev.querySelector('input, textarea, form')) {
+            if (!prev.dataset.speedshieldPurged && !prev.querySelector('input, textarea, form, [data-testid*="chat-message"]')) {
               prev.dataset.speedshieldPurged = 'true';
               prev.style.setProperty('display', 'none', 'important');
               prev.style.setProperty('height', '0px', 'important');
@@ -307,8 +330,80 @@
             prev = prev.previousElementSibling;
           }
 
-          // Ensure the character header bar docks cleanly at top: 0 with proper sticky anchoring
+          // 2. Collapse any ancestor previous siblings (if banner is in a higher layout row)
+          let anc = chatHeader.parentElement;
+          while (anc && anc !== document.body && anc !== document.documentElement) {
+            let prevAnc = anc.previousElementSibling;
+            while (prevAnc) {
+              if (!prevAnc.querySelector('input, textarea, form, [data-testid*="chat-message"]') &&
+                  prevAnc.tagName !== 'ASIDE' && !prevAnc.querySelector('nav, a[href*="/chat/"]')) {
+                const pr = prevAnc.getBoundingClientRect();
+                if (pr.height > 10 && pr.bottom <= (headerRect.top + 10)) {
+                  prevAnc.dataset.speedshieldPurged = 'true';
+                  prevAnc.style.setProperty('display', 'none', 'important');
+                  prevAnc.style.setProperty('height', '0px', 'important');
+                  prevAnc.style.setProperty('min-height', '0px', 'important');
+                  prevAnc.style.setProperty('max-height', '0px', 'important');
+                  prevAnc.style.setProperty('padding', '0px', 'important');
+                  prevAnc.style.setProperty('margin', '0px', 'important');
+                  newlyBlocked++;
+                }
+              }
+              prevAnc = prevAnc.previousElementSibling;
+            }
+            anc = anc.parentElement;
+          }
+
+          // 3. Scan for any rogue empty/ad banner placeholder sitting physically above the header
+          if (headerRect.top > 10) {
+            const candidatesAbove = document.querySelectorAll('div, section, aside, iframe');
+            for (let i = 0; i < candidatesAbove.length; i++) {
+              const el = candidatesAbove[i];
+              if (el.dataset.speedshieldPurged) continue;
+              if (el === document.body || el === document.documentElement) continue;
+              if (el.contains(chatHeader)) continue;
+              if (el.closest('[data-testid*="chat-message"], [class*="message"], [class*="bubble"]')) continue;
+              if (el.dataset.testid && el.dataset.testid.includes('chat-message')) continue;
+              if (el.querySelector('[data-testid*="chat-message"], input, textarea, form')) continue;
+              if (el.tagName === 'ASIDE' && el.clientHeight > 300) continue;
+              if (el.querySelector('a[href*="/chat/"]') && el.querySelectorAll('a').length > 2) continue;
+
+              const er = el.getBoundingClientRect();
+              if (er.height >= 15 && er.top >= -5 && er.bottom <= (headerRect.top + 5) && er.width > 80) {
+                el.dataset.speedshieldPurged = 'true';
+                el.style.setProperty('display', 'none', 'important');
+                el.style.setProperty('height', '0px', 'important');
+                el.style.setProperty('min-height', '0px', 'important');
+                el.style.setProperty('max-height', '0px', 'important');
+                el.style.setProperty('padding', '0px', 'important');
+                el.style.setProperty('margin', '0px', 'important');
+                newlyBlocked++;
+              }
+            }
+          }
+
+          // 4. Eliminate any artificial top spacing / margins on ancestors
+          let parent = chatHeader.parentElement;
+          while (parent && parent !== document.body && parent !== document.documentElement) {
+            const comp = window.getComputedStyle(parent);
+            const pt = parseInt(comp.paddingTop, 10) || 0;
+            const mt = parseInt(comp.marginTop, 10) || 0;
+            if (pt > 20) {
+              parent.style.setProperty('padding-top', '0px', 'important');
+            }
+            if (mt > 20) {
+              parent.style.setProperty('margin-top', '0px', 'important');
+            }
+            const topVal = parseInt(comp.top, 10) || 0;
+            if (topVal > 20 && comp.position !== 'static') {
+              parent.style.setProperty('top', '0px', 'important');
+            }
+            parent = parent.parentElement;
+          }
+
+          // 5. Ensure the character header bar docks cleanly at top: 0 with proper sticky anchoring
           chatHeader.style.setProperty('top', '0px', 'important');
+          chatHeader.style.setProperty('margin-top', '0px', 'important');
           chatHeader.style.setProperty('position', 'sticky', 'important');
           chatHeader.style.setProperty('z-index', '30', 'important');
         }
@@ -441,6 +536,14 @@
         }
       }, 250);
     }
+
+    // Proactive SPA route & layout monitor on Character.AI to catch dynamically mounted banner gaps
+    if (isCharacterAI) {
+      setInterval(() => {
+        purgeAdElements(document);
+      }, 500);
+    }
+
 
     // ==========================================================================
     // SECTION: Custom Cosmetic Filters & Interactive Element Zapper
