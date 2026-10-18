@@ -531,4 +531,50 @@ html[class*="sp-message-open"] {
   overflow: auto !important;
 }
 
+/* ==========================================================================
+   Character.AI & AI Tools: Top Banner Ad & Empty Black Gap Eliminator
+   ========================================================================== */
+[class*="cai-plus"],
+[class*="plus-offer"],
+[class*="promo-banner"],
+a[href*="c.ai/plus"],
+a[href*="character.ai/plus"],
+div:has(> a[href*="/plus"]),
+div:has(> a[href*="c.ai/plus"]),
+div:has(> a[href*="character.ai/plus"]),
+div:has(> [class*="cai-plus"]),
+div:has(> [class*="plus-offer"]),
+div:has(> [class*="promo-banner"]) {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ==========================================================================
+   Universal Ad Slot Container Collapser (Eliminates Blank Gap Rectangles)
+   ========================================================================== */
+div:has(> [id^="div-gpt-ad"]:only-child),
+div:has(> [id^="google_ads_"]:only-child),
+div:has(> [id^="ad-gpt-"]:only-child),
+div:has(> ins.adsbygoogle:only-child),
+div:has(> iframe[id^="google_ads_frame"]:only-child),
+div:has(> iframe[id^="aswift_"]:only-child),
+div:has(> [class*="ad-banner"]:only-child),
+div:has(> [class*="banner-ad"]:only-child),
+div:has(> [class*="ad-placement"]:only-child),
+div:has(> [class*="ad-slot"]:only-child),
+div:has(> [class*="ad-wrapper"]:only-child),
+div:has(> [class*="ad-container"]:only-child) {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 

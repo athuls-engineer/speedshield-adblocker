@@ -29,6 +29,7 @@
     let blockedCount = 0;
     const isYouTube = window.location.hostname.includes('youtube.com');
     const isTwitch = window.location.hostname.includes('twitch.tv');
+    const isCharacterAI = window.location.hostname.includes('character.ai');
 
     // Inject dynamic CSS rules for newly auto-updated ad selectors
     if (dynamicSelectors.length > 0) {
@@ -106,7 +107,14 @@
       'iframe[src*="adnxs.com"]',
       '.fc-ab-root',
       '.adblock-overlay',
-      '#adblock-notice'
+      '#adblock-notice',
+      '[class*="cai-plus"]',
+      '[class*="plus-offer"]',
+      '[class*="promo-banner"]',
+      '[class*="banner-ad"]',
+      '[data-testid*="banner"]',
+      'a[href*="c.ai/plus"]',
+      'a[href*="character.ai/plus"]'
     ];
 
     const ALL_SELECTORS = Array.from(new Set([...BASE_SELECTORS, ...dynamicSelectors]));
@@ -202,14 +210,46 @@
         el.style.setProperty('display', 'none', 'important');
         el.style.setProperty('visibility', 'hidden', 'important');
         el.style.setProperty('height', '0px', 'important');
+        el.style.setProperty('min-height', '0px', 'important');
+        el.style.setProperty('max-height', '0px', 'important');
         el.style.setProperty('margin', '0px', 'important');
         el.style.setProperty('padding', '0px', 'important');
         newlyBlocked++;
+
+        // Collapse empty parent wrappers (eliminates black/white empty gaps above headers and in feeds)
+        let parent = el.parentElement;
+        let depth = 0;
+        while (parent && parent !== document.body && parent !== document.documentElement && depth < 3) {
+          if (parent.tagName === 'HEADER' || parent.tagName === 'NAV' || parent.tagName === 'MAIN' || parent.querySelector('input, textarea, select, form')) {
+            break;
+          }
+          const visibleChildren = Array.from(parent.children).filter(c => !c.dataset.speedshieldPurged && c.style.display !== 'none');
+          if (visibleChildren.length === 0) {
+            const pText = (parent.textContent || '').trim().toLowerCase();
+            if (pText === '' || pText === 'advertisement' || pText === 'sponsored' || pText.includes('advertisement') || pText.includes('upgrade')) {
+              parent.dataset.speedshieldPurged = 'true';
+              parent.style.setProperty('display', 'none', 'important');
+              parent.style.setProperty('height', '0px', 'important');
+              parent.style.setProperty('min-height', '0px', 'important');
+              parent.style.setProperty('max-height', '0px', 'important');
+              parent.style.setProperty('padding', '0px', 'important');
+              parent.style.setProperty('margin', '0px', 'important');
+            }
+          }
+          parent = parent.parentElement;
+          depth++;
+        }
       }
 
-      // 3. Generic Empty Ad Placeholder Sweeper (Protected from YouTube core)
+      // 4. Generic Empty Ad Placeholder Sweeper (Protected from YouTube core)
       if (!isYouTube) {
-        const wrappers = root.querySelectorAll('[class^="ad-container"], [class*=" ad-container"], [class*="-ad-container"], [class^="ad-wrapper"], [class*=" ad-wrapper"], [class*="-ad-wrapper"], [class^="ad-slot"], [class*=" ad-slot"], [class*="-ad-slot"]');
+        const wrappers = root.querySelectorAll(
+          '[class^="ad-container"], [class*=" ad-container"], [class*="-ad-container"], ' +
+          '[class^="ad-wrapper"], [class*=" ad-wrapper"], [class*="-ad-wrapper"], ' +
+          '[class^="ad-slot"], [class*=" ad-slot"], [class*="-ad-slot"], ' +
+          '[class*="ad-banner"], [class*="banner-ad"], [class*="ad-placement"], ' +
+          '[class*="promo-banner"], [class*="cai-plus"], [class*="plus-offer"]'
+        );
         for (let i = 0; i < wrappers.length; i++) {
           const w = wrappers[i];
           if (w.dataset.speedshieldPurged) continue;
@@ -219,12 +259,64 @@
           const text = (w.textContent || '').trim();
           const isExplicitAdLabel = text.toLowerCase() === 'advertisement' || text.toLowerCase() === 'sponsored';
           // If empty, verify it doesn't contain legitimate images or user content
-          const isEmptyPlaceholder = text === '' && !w.querySelector('img, picture, svg, video, a');
+          const isEmptyPlaceholder = text === '' && !w.querySelector('img, picture, svg, video, a:not([href*="plus"])');
 
           if (isExplicitAdLabel || isEmptyPlaceholder) {
             w.dataset.speedshieldPurged = 'true';
             w.style.setProperty('display', 'none', 'important');
+            w.style.setProperty('height', '0px', 'important');
+            w.style.setProperty('min-height', '0px', 'important');
+            w.style.setProperty('padding', '0px', 'important');
+            w.style.setProperty('margin', '0px', 'important');
             newlyBlocked++;
+          }
+        }
+      }
+
+      // 5. Character.AI Top Banner Ad & Empty Black Gap Eliminator
+      if (isCharacterAI) {
+        // Target C.AI+ promo banners, top ad placeholders, and sticky banner wrappers
+        const caiBanners = root.querySelectorAll(
+          '[class*="cai-plus"], [class*="plus-offer"], [class*="upgrade" i], [class*="ad-banner"], [class*="banner-ad"], [class*="promo-banner"], [data-testid*="banner"], [data-testid*="upgrade"], a[href*="/plus"], a[href*="c.ai/plus"]'
+        );
+        for (let i = 0; i < caiBanners.length; i++) {
+          const b = caiBanners[i];
+          if (b.dataset.speedshieldPurged) continue;
+          if (b.closest('nav') || b.querySelector('input, textarea, form') || b.closest('[data-testid*="chat-message"]')) continue;
+
+          // Collapse banner and its outer wrapper container completely
+          const wrapper = b.closest('div.w-full, div.relative, div.flex, [class*="banner"]') || b;
+          wrapper.dataset.speedshieldPurged = 'true';
+          wrapper.style.setProperty('display', 'none', 'important');
+          wrapper.style.setProperty('height', '0px', 'important');
+          wrapper.style.setProperty('min-height', '0px', 'important');
+          wrapper.style.setProperty('max-height', '0px', 'important');
+          wrapper.style.setProperty('padding', '0px', 'important');
+          wrapper.style.setProperty('margin', '0px', 'important');
+          newlyBlocked++;
+        }
+
+        // Collapse any empty placeholder containers sitting above the chat header
+        const headers = document.querySelectorAll('header, [class*="header"], nav:has(button)');
+        for (let h = 0; h < headers.length; h++) {
+          const hdr = headers[h];
+          if (!hdr || !hdr.parentElement) continue;
+          let prev = hdr.previousElementSibling;
+          while (prev) {
+            if (!prev.dataset.speedshieldPurged && !prev.querySelector('input, textarea, form, button, a:not([href*="plus"])')) {
+              const text = (prev.textContent || '').trim().toLowerCase();
+              if (text === '' || text.includes('ad') || text.includes('plus') || text.includes('upgrade') || text.includes('sponsor')) {
+                prev.dataset.speedshieldPurged = 'true';
+                prev.style.setProperty('display', 'none', 'important');
+                prev.style.setProperty('height', '0px', 'important');
+                prev.style.setProperty('min-height', '0px', 'important');
+                prev.style.setProperty('max-height', '0px', 'important');
+                prev.style.setProperty('padding', '0px', 'important');
+                prev.style.setProperty('margin', '0px', 'important');
+                newlyBlocked++;
+              }
+            }
+            prev = prev.previousElementSibling;
           }
         }
       }

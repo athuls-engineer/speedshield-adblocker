@@ -84,7 +84,14 @@ const MODERN_COSMETIC_SELECTORS = [
   'div[data-a-target="sponsored-stream"]',
   '.tw-premium-banner',
   '[data-a-target="side-nav-ad"]',
-  'iframe[src*="amazon-adsystem"]'
+  'iframe[src*="amazon-adsystem"]',
+  '[class*="cai-plus"]',
+  '[class*="plus-offer"]',
+  '[class*="promo-banner"]',
+  '[class*="banner-ad"]',
+  '[data-testid*="banner"]',
+  'a[href*="c.ai/plus"]',
+  'a[href*="character.ai/plus"]'
 ];
 
 // Per-tab blocked request tracker
