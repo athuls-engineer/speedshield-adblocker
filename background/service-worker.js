@@ -89,7 +89,7 @@ const MODERN_COSMETIC_SELECTORS = [
   '[class*="plus-offer"]',
   '[class*="promo-banner"]',
   '[class*="banner-ad"]',
-  '[data-testid*="banner"]',
+  'div[data-testid*="ad-banner"]',
   'a[href*="c.ai/plus"]',
   'a[href*="character.ai/plus"]'
 ];

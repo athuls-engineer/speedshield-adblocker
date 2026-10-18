@@ -29,7 +29,7 @@
     let blockedCount = 0;
     const isYouTube = window.location.hostname.includes('youtube.com');
     const isTwitch = window.location.hostname.includes('twitch.tv');
-    const isCharacterAI = window.location.hostname.includes('character.ai');
+    const isCharacterAI = window.location.hostname.includes('character.ai') || window.location.hostname.endsWith('c.ai');
 
     // Inject dynamic CSS rules for newly auto-updated ad selectors
     if (dynamicSelectors.length > 0) {
@@ -112,7 +112,7 @@
       '[class*="plus-offer"]',
       '[class*="promo-banner"]',
       '[class*="banner-ad"]',
-      '[data-testid*="banner"]',
+      'div[data-testid*="ad-banner"]',
       'a[href*="c.ai/plus"]',
       'a[href*="character.ai/plus"]'
     ];
@@ -216,32 +216,9 @@
         el.style.setProperty('padding', '0px', 'important');
         newlyBlocked++;
 
-        // Collapse empty parent wrappers (eliminates black/white empty gaps above headers and in feeds)
-        let parent = el.parentElement;
-        let depth = 0;
-        while (parent && parent !== document.body && parent !== document.documentElement && depth < 3) {
-          if (parent.tagName === 'HEADER' || parent.tagName === 'NAV' || parent.tagName === 'MAIN' || parent.querySelector('input, textarea, select, form')) {
-            break;
-          }
-          const visibleChildren = Array.from(parent.children).filter(c => !c.dataset.speedshieldPurged && c.style.display !== 'none');
-          if (visibleChildren.length === 0) {
-            const pText = (parent.textContent || '').trim().toLowerCase();
-            if (pText === '' || pText === 'advertisement' || pText === 'sponsored' || pText.includes('advertisement') || pText.includes('upgrade')) {
-              parent.dataset.speedshieldPurged = 'true';
-              parent.style.setProperty('display', 'none', 'important');
-              parent.style.setProperty('height', '0px', 'important');
-              parent.style.setProperty('min-height', '0px', 'important');
-              parent.style.setProperty('max-height', '0px', 'important');
-              parent.style.setProperty('padding', '0px', 'important');
-              parent.style.setProperty('margin', '0px', 'important');
-            }
-          }
-          parent = parent.parentElement;
-          depth++;
-        }
       }
 
-      // 4. Generic Empty Ad Placeholder Sweeper (Protected from YouTube core)
+      // 4. Generic Empty Ad Placeholder Sweeper (Protected from YouTube core and chat apps)
       if (!isYouTube) {
         const wrappers = root.querySelectorAll(
           '[class^="ad-container"], [class*=" ad-container"], [class*="-ad-container"], ' +
@@ -253,7 +230,8 @@
         for (let i = 0; i < wrappers.length; i++) {
           const w = wrappers[i];
           if (w.dataset.speedshieldPurged) continue;
-          // Never hide elements containing interactive controls or forms
+          // Never hide message bubbles, inputs, interactive controls, or forms
+          if (w.closest('[data-testid*="chat-message"], [class*="message"], [class*="bubble"]')) continue;
           if (w.querySelector('input, button, select, textarea, form, canvas')) continue;
 
           const text = (w.textContent || '').trim();
@@ -275,49 +253,64 @@
 
       // 5. Character.AI Top Banner Ad & Empty Black Gap Eliminator
       if (isCharacterAI) {
-        // Target C.AI+ promo banners, top ad placeholders, and sticky banner wrappers
+        // A. Purge specific known Character.AI promo & ad banner components
         const caiBanners = root.querySelectorAll(
-          '[class*="cai-plus"], [class*="plus-offer"], [class*="upgrade" i], [class*="ad-banner"], [class*="banner-ad"], [class*="promo-banner"], [data-testid*="banner"], [data-testid*="upgrade"], a[href*="/plus"], a[href*="c.ai/plus"]'
+          '[class*="cai-plus"], [class*="plus-offer"], [class*="promo-banner"], ' +
+          '[class*="ad-banner"], [class*="banner-ad"], div[data-testid*="ad-banner"], ' +
+          'aside[class*="ad" i], a[href*="c.ai/plus"], a[href*="character.ai/plus"]'
         );
         for (let i = 0; i < caiBanners.length; i++) {
           const b = caiBanners[i];
           if (b.dataset.speedshieldPurged) continue;
-          if (b.closest('nav') || b.querySelector('input, textarea, form') || b.closest('[data-testid*="chat-message"]')) continue;
+          // Never touch chat messages, chat history, or input containers
+          if (b.closest('[data-testid*="chat-message"], [class*="message"], [class*="bubble"]')) continue;
+          if (b.querySelector('input, textarea, form')) continue;
 
-          // Collapse banner and its outer wrapper container completely
-          const wrapper = b.closest('div.w-full, div.relative, div.flex, [class*="banner"]') || b;
-          wrapper.dataset.speedshieldPurged = 'true';
-          wrapper.style.setProperty('display', 'none', 'important');
-          wrapper.style.setProperty('height', '0px', 'important');
-          wrapper.style.setProperty('min-height', '0px', 'important');
-          wrapper.style.setProperty('max-height', '0px', 'important');
-          wrapper.style.setProperty('padding', '0px', 'important');
-          wrapper.style.setProperty('margin', '0px', 'important');
+          b.dataset.speedshieldPurged = 'true';
+          b.style.setProperty('display', 'none', 'important');
+          b.style.setProperty('height', '0px', 'important');
+          b.style.setProperty('min-height', '0px', 'important');
+          b.style.setProperty('max-height', '0px', 'important');
+          b.style.setProperty('padding', '0px', 'important');
+          b.style.setProperty('margin', '0px', 'important');
           newlyBlocked++;
         }
 
-        // Collapse any empty placeholder containers sitting above the chat header
-        const headers = document.querySelectorAll('header, [class*="header"], nav:has(button)');
-        for (let h = 0; h < headers.length; h++) {
-          const hdr = headers[h];
-          if (!hdr || !hdr.parentElement) continue;
-          let prev = hdr.previousElementSibling;
+        // B. Locate the actual Character Chat Header and collapse any empty banner slot above it
+        // The character header bar displays the character creator handle "By @" or contains character info
+        let chatHeader = null;
+        const candidateHeaders = document.querySelectorAll('header, [role="banner"], div[class*="header"]');
+        for (let h = 0; h < candidateHeaders.length; h++) {
+          const hdr = candidateHeaders[h];
+          if (hdr.closest('[data-testid*="chat-message"], [class*="message"], [class*="bubble"]')) continue;
+          if (hdr.querySelector('textarea, input, form')) continue;
+          if ((hdr.textContent && hdr.textContent.includes('By @')) || (hdr.querySelector('img') && hdr.querySelector('button'))) {
+            chatHeader = hdr;
+            break;
+          }
+        }
+
+        if (chatHeader) {
+          // Collapse any banner slot sitting immediately before the chat header in the column
+          let prev = chatHeader.previousElementSibling;
           while (prev) {
-            if (!prev.dataset.speedshieldPurged && !prev.querySelector('input, textarea, form, button, a:not([href*="plus"])')) {
-              const text = (prev.textContent || '').trim().toLowerCase();
-              if (text === '' || text.includes('ad') || text.includes('plus') || text.includes('upgrade') || text.includes('sponsor')) {
-                prev.dataset.speedshieldPurged = 'true';
-                prev.style.setProperty('display', 'none', 'important');
-                prev.style.setProperty('height', '0px', 'important');
-                prev.style.setProperty('min-height', '0px', 'important');
-                prev.style.setProperty('max-height', '0px', 'important');
-                prev.style.setProperty('padding', '0px', 'important');
-                prev.style.setProperty('margin', '0px', 'important');
-                newlyBlocked++;
-              }
+            if (!prev.dataset.speedshieldPurged && !prev.querySelector('input, textarea, form')) {
+              prev.dataset.speedshieldPurged = 'true';
+              prev.style.setProperty('display', 'none', 'important');
+              prev.style.setProperty('height', '0px', 'important');
+              prev.style.setProperty('min-height', '0px', 'important');
+              prev.style.setProperty('max-height', '0px', 'important');
+              prev.style.setProperty('padding', '0px', 'important');
+              prev.style.setProperty('margin', '0px', 'important');
+              newlyBlocked++;
             }
             prev = prev.previousElementSibling;
           }
+
+          // Ensure the character header bar docks cleanly at top: 0 with proper sticky anchoring
+          chatHeader.style.setProperty('top', '0px', 'important');
+          chatHeader.style.setProperty('position', 'sticky', 'important');
+          chatHeader.style.setProperty('z-index', '30', 'important');
         }
       }
 
