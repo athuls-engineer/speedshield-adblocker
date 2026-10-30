@@ -1,0 +1,47 @@
+name: SpeedShield Lint & DNR Ruleset Validation
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate-rulesets:
+    name: Validate Manifest & DNR Rulesets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate Manifest V3 Schema & Ruleset JSON Syntax
+        run: |
+          python -c "
+          import json, glob, sys
+          
+          # 1. Validate manifest.json
+          with open('manifest.json', 'r', encoding='utf-8') as f:
+              manifest = json.load(f)
+          assert manifest.get('manifest_version') == 3, 'Must be Manifest V3'
+          print('✓ manifest.json is valid Manifest V3')
+          
+          # 2. Validate all rulesets in rules/
+          ruleset_files = glob.glob('rules/*.json')
+          assert len(ruleset_files) > 0, 'No ruleset files found'
+          total_rules = 0
+          for rf in ruleset_files:
+              with open(rf, 'r', encoding='utf-8') as f:
+                  rules = json.load(f)
+                  assert isinstance(rules, list), f'{rf} must contain a JSON list of rules'
+                  for rule in rules:
+                      assert 'id' in rule and 'action' in rule and 'condition' in rule, f'Malformed rule in {rf}: {rule}'
+                  total_rules += len(rules)
+                  print(f'✓ {rf}: {len(rules)} valid rules')
+          print(f'✓ All {len(ruleset_files)} rulesets valid ({total_rules} total DNR rules)')
+          "

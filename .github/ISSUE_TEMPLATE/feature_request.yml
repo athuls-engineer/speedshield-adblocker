@@ -1,0 +1,11 @@
+name: Feature or Filter Suggestion
+description: Propose a new feature or additional filter feed
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Suggestion
+      description: Describe the feature, cosmetic filter, or threat list feed you would like to see added.
+    validations:
+      required: true

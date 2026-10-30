@@ -1,0 +1,33 @@
+name: Filter / Extension Issue
+description: Report a broken site, unblocked ad, or extension bug
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for helping improve SpeedShield!
+  - type: input
+    id: website
+    attributes:
+      label: Website URL
+      description: On which URL does the issue occur?
+      placeholder: https://example.com
+    validations:
+      required: true
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Issue Type
+      options:
+        - Unblocked advertisement / sponsored banner
+        - Page breakage / anti-adblock detection
+        - Popup / redirect bypass
+        - Extension UI / Settings bug
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Description
+      description: Describe what you observed.
+    validations:
+      required: true
