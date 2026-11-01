@@ -471,9 +471,6 @@
     'alb.reddit.com',
     'pixel.reddit.com',
     'redditstatic.com/telemetry',
-    'reddit.com/svc/events',
-    'svc/events/preload-head',
-    '/svc/events',
     'spade.twitch.tv',
     'science.twitch.tv',
     'countess.twitch.tv',
@@ -495,7 +492,6 @@
     'tiktok.com/api/v1/event',
     'analytics.tiktok.com',
     'facebook.com/tr',
-    'connect.facebook.net',
     'static.ads-twitter.com',
     'analytics.twitter.com',
     'fpjs.sh',
@@ -503,7 +499,6 @@
     'openfpcdn.io',
     'fingerprint.com',
     'browser-intake-datadoghq',
-    'sentry.io/api',
     'criteo.com',
     'criteo.net',
     'appsflyer.com',
@@ -528,9 +523,14 @@
     'adnxs.com'
   ];
 
+  const isReddit = (window.location.hostname || '').includes('reddit.com');
+  const isTwitch = (window.location.hostname || '').includes('twitch.tv');
+  const isYouTubeHost = (window.location.hostname || '').includes('youtube.com');
+
   function isTrackingUrl(url) {
     if (!url) return false;
     const u = String(url).toLowerCase();
+    if (isReddit && (u.includes('svc/events') || u.includes('preload-head'))) return true;
     return TRACKING_PATTERNS.some(pattern => u.includes(pattern));
   }
 
@@ -557,24 +557,24 @@
     }
   } catch (e) {}
 
-  // 2. Global fetch() Interceptor (Reddit, Twitch Telemetry & Stream Ad Pruner)
+  // 2. Global fetch() Interceptor (Zero-Latency Native Passthrough)
   const originalFetch = window.fetch;
-  window.fetch = makeNative(async function(...args) {
+  window.fetch = makeNative(function(...args) {
     const rawUrl = args[0];
     const url = typeof rawUrl === 'string' ? rawUrl : (rawUrl && rawUrl.url ? rawUrl.url : '');
     const options = args[1] || {};
 
     // Reddit, Twitch & Third-Party Telemetry: Return immediate mock 200 OK
     if (isTrackingUrl(url)) {
-      return new Response('{"data":{"success":true}}', {
+      return Promise.resolve(new Response('{"data":{"success":true}}', {
         status: 200,
         statusText: 'OK',
         headers: { 'Content-Type': 'application/json' }
-      });
+      }));
     }
 
     // Reddit GraphQL Telemetry & Ad Tracking Operations
-    if (url.includes('gql.reddit.com')) {
+    if (isReddit && url.includes('gql.reddit.com')) {
       try {
         const bodyStr = typeof options.body === 'string' ? options.body : '';
         if (
@@ -583,17 +583,17 @@
           bodyStr.includes('AdImpression') ||
           bodyStr.includes('Track')
         ) {
-          return new Response('{"data":{"success":true}}', {
+          return Promise.resolve(new Response('{"data":{"success":true}}', {
             status: 200,
             statusText: 'OK',
             headers: { 'Content-Type': 'application/json' }
-          });
+          }));
         }
       } catch (e) {}
     }
 
     // Twitch GraphQL Telemetry & Ad Operations
-    if (url.includes('gql.twitch.tv')) {
+    if (isTwitch && url.includes('gql.twitch.tv')) {
       try {
         const bodyStr = typeof options.body === 'string' ? options.body : '';
         if (
@@ -609,34 +609,36 @@
           bodyStr.includes('StripedAd') ||
           bodyStr.includes('Spade')
         ) {
-          return new Response(JSON.stringify([{ data: { success: true } }]), {
+          return Promise.resolve(new Response(JSON.stringify([{ data: { success: true } }]), {
             status: 200,
             statusText: 'OK',
             headers: { 'Content-Type': 'application/json' }
-          });
+          }));
         }
       } catch (e) {}
     }
 
     // YouTube Native Ad Pruning on player & next endpoints
-    const response = await originalFetch.apply(this, args);
-    if (url.includes('/youtubei/v1/player') || url.includes('/youtubei/v1/next')) {
-      try {
-        const clone = response.clone();
-        const json = await clone.json();
-        pruneYouTubeAdData(json);
+    if (isYouTubeHost && (url.includes('/youtubei/v1/player') || url.includes('/youtubei/v1/next'))) {
+      return originalFetch.apply(this, args).then(async (response) => {
+        try {
+          const clone = response.clone();
+          const json = await clone.json();
+          pruneYouTubeAdData(json);
 
-        return new Response(JSON.stringify(json), {
-          status: response.status,
-          statusText: response.statusText,
-          headers: response.headers
-        });
-      } catch (e) {
-        return response;
-      }
+          return new Response(JSON.stringify(json), {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers
+          });
+        } catch (e) {
+          return response;
+        }
+      });
     }
 
-    return response;
+    // 100% native zero-overhead passthrough for all standard web traffic
+    return originalFetch.apply(this, args);
   }, 'fetch');
 
   // ==========================================================================
@@ -958,13 +960,150 @@
   } catch (e) {}
 
   // ==========================================================================
-  // SECTION 8: Global Scriptlet Defuser (Zero-Crash Native Stubs for 15+ Trackers)
-  // Prevents websites from throwing unhandled TypeErrors when trackers are blocked
+  // SECTION 8: Global Zero-Crash Scriptlet & Accelerator Stubs
+  // Stubs blocked ad frameworks (GPT, Amazon apstag, Prebid, IAB TCF, OneTrust, etc.)
+  // and executes their pending callbacks immediately with zero delay
   // ==========================================================================
   try {
     const noopFn = makeNative(function() { return noopFn; }, 'noop');
 
-    // Google Analytics & Google Tag Manager & gtag
+    function createSafeProxy(name = 'noop') {
+      const fn = function() { return proxy; };
+      const proxy = new Proxy(fn, {
+        get(target, prop) {
+          if (prop in target) return target[prop];
+          if (prop === Symbol.toPrimitive) {
+            return (hint) => (hint === 'number' ? 0 : hint === 'string' ? '' : false);
+          }
+          if (prop === 'then') return undefined;
+          if (prop === 'name') return name;
+          if (prop === 'length') return 0;
+          if (prop === 'toString' || prop === 'valueOf') return () => `function ${name}() { [native code] }`;
+          if (prop === 'IsAlertBoxClosed' || prop === 'isAlertBoxClosed') return () => true;
+          return proxy;
+        },
+        set(target, prop, value) {
+          target[prop] = value;
+          return true;
+        },
+        apply(target, thisArg, args) {
+          return proxy;
+        },
+        construct(target, args) {
+          return proxy;
+        }
+      });
+      return proxy;
+    }
+
+    // 1. Google Publisher Tag (googletag / GPT)
+    // Instantly executes queued page commands instead of timing out on blocked ad scripts
+    if (!window.googletag) {
+      const gptProxy = createSafeProxy('googletag');
+      const gptCmd = [];
+      gptCmd.push = function(...fns) {
+        for (const fn of fns) {
+          if (typeof fn === 'function') {
+            try { fn.call(window); } catch (e) {}
+          }
+        }
+        return gptCmd.length;
+      };
+      gptProxy.cmd = gptCmd;
+      gptProxy.pubads = () => gptProxy;
+      gptProxy.companionAds = () => gptProxy;
+      gptProxy.sizeMapping = () => gptProxy;
+      gptProxy.defineSlot = () => gptProxy;
+      gptProxy.defineOutOfPageSlot = () => gptProxy;
+      gptProxy.display = () => gptProxy;
+      gptProxy.enableServices = () => gptProxy;
+      window.googletag = gptProxy;
+    }
+
+    // 2. Amazon Publisher Services (apstag)
+    // Eliminates 3000ms+ auction timeouts on ESPN, Reddit, Forbes, Yahoo, etc.
+    if (!window.apstag) {
+      const apstagProxy = createSafeProxy('apstag');
+      apstagProxy.init = (cfg, cb) => { if (typeof cb === 'function') try { cb(); } catch (e) {} };
+      apstagProxy.fetchBids = (cfg, cb) => { if (typeof cb === 'function') try { cb([]); } catch (e) {} };
+      apstagProxy.setDisplayBids = () => {};
+      window.apstag = apstagProxy;
+    }
+
+    // 3. Prebid.js (pbjs)
+    // Eliminates 2000ms header bidding timeout across 70%+ of top publishing sites
+    if (!window.pbjs) {
+      const pbjsProxy = createSafeProxy('pbjs');
+      const pbjsQue = [];
+      pbjsQue.push = function(...fns) {
+        for (const fn of fns) {
+          if (typeof fn === 'function') {
+            try { fn.call(window); } catch (e) {}
+          }
+        }
+        return pbjsQue.length;
+      };
+      pbjsProxy.que = pbjsQue;
+      pbjsProxy.requestBids = (obj) => {
+        if (obj && typeof obj.bidsBackHandler === 'function') {
+          try { obj.bidsBackHandler(); } catch (e) {}
+        }
+      };
+      window.pbjs = pbjsProxy;
+    }
+
+    // 4. IAB Europe TCF (__tcfapi) & US Privacy (__uspapi)
+    // Instantly grants consent status so GDPR-gated European & global news portals load immediately
+    window.__tcfapi = window.__tcfapi || function(command, version, callback, parameter) {
+      if (typeof callback === 'function') {
+        const tcData = {
+          tcString: 'CP1234567890',
+          cmpId: 1,
+          cmpVersion: 1,
+          tcfPolicyVersion: 2,
+          gdprApplies: false,
+          eventStatus: 'tcloaded',
+          cmpStatus: 'loaded',
+          listenerId: 1,
+          vendor: { consents: {}, legitimateInterests: {} },
+          purpose: { consents: {}, legitimateInterests: {} }
+        };
+        try { callback(tcData, true); } catch (e) {}
+      }
+    };
+
+    window.__uspapi = window.__uspapi || function(command, version, callback) {
+      if (typeof callback === 'function') {
+        try { callback({ uspString: '1---' }, true); } catch (e) {}
+      }
+    };
+
+    // 5. OneTrust / Optanon Active Groups & Wrapper
+    // Tells enterprise sites all categories are active so they release page content immediately
+    window.OnetrustActiveGroups = window.OnetrustActiveGroups || ',C0001,C0002,C0003,C0004,';
+    window.OptanonActiveGroups = window.OptanonActiveGroups || ',C0001,C0002,C0003,C0004,';
+    window.OneTrust = window.OneTrust || createSafeProxy('OneTrust');
+    window.OptanonWrapper = window.OptanonWrapper || function() {};
+
+    // 6. Didomi Consent Queue
+    // Executes queued Didomi content callbacks immediately
+    if (!window.didomiOnReady) {
+      const didomiQueue = [];
+      didomiQueue.push = function(...fns) {
+        for (const fn of fns) {
+          if (typeof fn === 'function') {
+            try { fn.call(window, createSafeProxy('Didomi')); } catch (e) {}
+          }
+        }
+        return didomiQueue.length;
+      };
+      window.didomiOnReady = didomiQueue;
+    }
+
+    // 7. Cookiebot
+    window.Cookiebot = window.Cookiebot || createSafeProxy('Cookiebot');
+
+    // 8. Google Analytics & Google Tag Manager & gtag
     window.ga = window.ga || noopFn;
     window._gaq = window._gaq || [];
     window._gaq.push = window._gaq.push || noopFn;
@@ -977,60 +1116,32 @@
       }
       return noopFn;
     }, 'gtag');
-    window.google_tag_manager = window.google_tag_manager || {};
+    window.google_tag_manager = window.google_tag_manager || createSafeProxy('google_tag_manager');
 
-    // CMP & Consent Managers (OneTrust / Optanon / Cookiebot)
-    // Prevents enterprise sites from crashing or hanging waiting for CMP callbacks
-    window.OneTrust = window.OneTrust || {
-      Init: noopFn,
-      IsAlertBoxClosed: () => true,
-      OnConsentChanged: noopFn,
-      ToggleInfoDisplay: noopFn,
-      Close: noopFn
-    };
-    window.OptanonWrapper = window.OptanonWrapper || noopFn;
-    window.Cookiebot = window.Cookiebot || { consent: { necessary: true, preferences: true, statistics: false, marketing: false }, show: noopFn, hide: noopFn };
-
-    // Criteo & Retargeting
+    // 9. Criteo & Retargeting
     window.criteo_q = window.criteo_q || [];
-    window.criteo_q.push = window.criteo_q.push || noopFn;
+    window.criteo_q.push = window.criteo_q.push || function(...fns) {
+      for (const fn of fns) { if (typeof fn === 'function') try { fn(); } catch (e) {} }
+    };
 
-    // Google AdSense
+    // 10. Google AdSense
     window.adsbygoogle = window.adsbygoogle || [];
     window.adsbygoogle.push = window.adsbygoogle.push || noopFn;
 
-    // Meta (Facebook) Pixel
+    // 11. Social Trackers & Web Analytics (Protected from unhandled TypeErrors)
     window.fbq = window.fbq || noopFn;
     window._fbq = window._fbq || window.fbq;
-
-    // Twitter / X Pixel
     window.twq = window.twq || noopFn;
-
-    // TikTok Pixel
-    window.ttq = window.ttq || { track: noopFn, page: noopFn, load: noopFn, identify: noopFn };
-
-    // LinkedIn Insight Tag
+    window.ttq = window.ttq || createSafeProxy('ttq');
     window.lintrk = window.lintrk || noopFn;
-
-    // Pinterest Tag
     window.pintrk = window.pintrk || noopFn;
-
-    // Snapchat Pixel
     window.snaptrq = window.snaptrq || noopFn;
-
-    // Microsoft Clarity
-    window.clarity = window.clarity || noopFn;
-
-    // Hotjar
-    window.hj = window.hj || noopFn;
+    window.clarity = window.clarity || createSafeProxy('clarity');
+    window.hj = window.hj || createSafeProxy('hj');
     window._hjSettings = window._hjSettings || { hjid: 0, hjsv: 0 };
-
-    // Amplitude & Segment
-    window.amplitude = window.amplitude || { getInstance: () => ({ init: noopFn, logEvent: noopFn, setUserId: noopFn }) };
-    window.analytics = window.analytics || { track: noopFn, page: noopFn, identify: noopFn };
-
-    // Mixpanel
-    window.mixpanel = window.mixpanel || { init: noopFn, track: noopFn, identify: noopFn, people: { set: noopFn } };
+    window.amplitude = window.amplitude || createSafeProxy('amplitude');
+    window.analytics = window.analytics || createSafeProxy('analytics');
+    window.mixpanel = window.mixpanel || createSafeProxy('mixpanel');
   } catch (e) {}
 
   // ==========================================================================

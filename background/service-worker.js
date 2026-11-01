@@ -8,6 +8,20 @@ const DYNAMIC_RULE_START_ID = 10000;
 const MAX_DYNAMIC_RULES = 5000;
 const STATIC_RULESET_IDS = ['ruleset_ad_servers', 'ruleset_trackers', 'ruleset_popups', 'ruleset_annoyances', 'ruleset_url_cleaner'];
 
+// Protected vital web infrastructure, CDNs, authentication, and core services
+// These domains are immune from dynamic blocklists to prevent false-positive site outages
+const PROTECTED_INFRA_DOMAINS = [
+  'google.com', 'googleapis.com', 'gstatic.com', 'googleusercontent.com', 'googledrive.com', 'youtube.com', 'youtu.be',
+  'microsoft.com', 'live.com', 'office.com', 'azure.com', 'github.com', 'githubusercontent.com',
+  'apple.com', 'icloud.com', 'appleid.apple.com',
+  'cloudflare.com', 'cdnjs.cloudflare.com', 'jsdelivr.net', 'unpkg.com', 'akamai.net', 'akamaized.net', 'fastly.net',
+  'amazon.com', 'amazonaws.com', 'aws.amazon.com',
+  'paypal.com', 'stripe.com', 'auth0.com', 'okta.com', 'klarna.com', 'razorpay.com',
+  'facebook.com', 'instagram.com', 'whatsapp.com', 'telegram.org', 'discord.com',
+  'reddit.com', 'wikipedia.org', 'character.ai', 'c.ai', 'chatgpt.com', 'openai.com', 'claude.ai',
+  'twitter.com', 'x.com', 'linkedin.com'
+];
+
 // Curated live threat, malware, virus, tracker, and ad feeds for autonomous updates
 const REMOTE_RULE_SOURCES = [
   'https://urlhaus.abuse.ch/downloads/hostfile/',
@@ -439,7 +453,8 @@ async function checkAndPerformUpdate(forced = false) {
           if (domain && domain !== 'localhost' && domain.includes('.') && !domain.startsWith('.')) {
             domain = domain.replace(/[\^$|]/g, '');
             if (/^(?!-)[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i.test(domain)) {
-              if (!fetchedDomains.has(domain)) {
+              const isProtected = PROTECTED_INFRA_DOMAINS.some(p => domain === p || domain.endsWith('.' + p));
+              if (!isProtected && !fetchedDomains.has(domain)) {
                 fetchedDomains.add(domain);
                 fromThisFeed++;
               }

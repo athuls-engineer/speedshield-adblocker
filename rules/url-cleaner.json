@@ -45,8 +45,27 @@
     "condition": {
       "urlFilter": "|http*",
       "resourceTypes": [
-        "main_frame",
-        "sub_frame"
+        "main_frame"
+      ],
+      "excludedDomains": [
+        "accounts.google.com",
+        "appleid.apple.com",
+        "login.microsoftonline.com",
+        "login.live.com",
+        "github.com",
+        "gitlab.com",
+        "auth0.com",
+        "okta.com",
+        "paypal.com",
+        "stripe.com",
+        "checkout.stripe.com",
+        "pay.google.com",
+        "klarna.com",
+        "razorpay.com",
+        "square.com",
+        "cash.app",
+        "authorize.net",
+        "braintreegateway.com"
       ]
     }
   },

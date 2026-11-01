@@ -220,6 +220,10 @@
 
       // 4. Generic Empty Ad Placeholder Sweeper (Protected from YouTube core and chat apps)
       if (!isYouTube) {
+        // Only evaluate empty placeholder collapsing once document is complete
+        // (prevents collapsing dynamic React/Vue/Angular containers before components mount)
+        const isPageComplete = document.readyState === 'complete';
+
         const wrappers = root.querySelectorAll(
           '[class^="ad-container"], [class*=" ad-container"], [class*="-ad-container"], ' +
           '[class^="ad-wrapper"], [class*=" ad-wrapper"], [class*="-ad-wrapper"], ' +
@@ -236,8 +240,8 @@
 
           const text = (w.textContent || '').trim();
           const isExplicitAdLabel = text.toLowerCase() === 'advertisement' || text.toLowerCase() === 'sponsored';
-          // If empty, verify it doesn't contain legitimate images or user content
-          const isEmptyPlaceholder = text === '' && !w.querySelector('img, picture, svg, video, a:not([href*="plus"])');
+          // If empty, verify it doesn't contain legitimate images or user content, AND only collapse if page is complete
+          const isEmptyPlaceholder = isPageComplete && text === '' && !w.querySelector('img, picture, svg, video, a:not([href*="plus"])');
 
           if (isExplicitAdLabel || isEmptyPlaceholder) {
             w.dataset.speedshieldPurged = 'true';
@@ -257,7 +261,7 @@
         const caiBanners = root.querySelectorAll(
           '[class*="cai-plus"], [class*="plus-offer"], [class*="promo-banner"], ' +
           '[class*="ad-banner"], [class*="banner-ad"], div[data-testid*="ad-banner"], ' +
-          'aside[class*="ad" i], a[href*="c.ai/plus"], a[href*="character.ai/plus"]'
+          'aside[class*="ad" i], a[href*="/plus"], a[href*="c.ai/plus"], a[href*="character.ai/plus"]'
         );
         for (let i = 0; i < caiBanners.length; i++) {
           const b = caiBanners[i];
@@ -273,6 +277,20 @@
           b.style.setProperty('max-height', '0px', 'important');
           b.style.setProperty('padding', '0px', 'important');
           b.style.setProperty('margin', '0px', 'important');
+
+          // If the parent is just an isolated banner wrapper, collapse it too
+          const parent = b.parentElement;
+          if (parent && parent !== document.body && parent !== document.documentElement && !parent.querySelector('[data-testid*="chat-message"], input, textarea')) {
+            if (parent.children.length <= 2 && (parent.clientHeight < 220 || parent.offsetHeight < 220)) {
+              parent.dataset.speedshieldPurged = 'true';
+              parent.style.setProperty('display', 'none', 'important');
+              parent.style.setProperty('height', '0px', 'important');
+              parent.style.setProperty('min-height', '0px', 'important');
+              parent.style.setProperty('max-height', '0px', 'important');
+              parent.style.setProperty('padding', '0px', 'important');
+              parent.style.setProperty('margin', '0px', 'important');
+            }
+          }
           newlyBlocked++;
         }
 
@@ -280,20 +298,20 @@
         // In modern Tailwind React SPAs, headers are <div>s with utility classes, not semantic <header>s.
         // We find the creator handle 'By @' (e.g. 'By @roylath724') and walk up to the chat header bar container.
         let chatHeader = null;
-        const allByAt = document.querySelectorAll('*');
-        for (let i = 0; i < allByAt.length; i++) {
-          const el = allByAt[i];
-          if (el.children.length === 0 && el.textContent && el.textContent.includes('By @')) {
-            let curr = el;
-            while (curr && curr.parentElement && curr.parentElement !== document.body && curr.parentElement !== document.documentElement) {
-              const p = curr.parentElement;
-              if (p.querySelector('[data-testid*="chat-message"]') || p.clientHeight > 300 || p.offsetHeight > 300) {
-                chatHeader = curr;
-                break;
-              }
-              curr = p;
+        const candidateBy = Array.from(document.querySelectorAll('span, a, p, div, button')).filter(el => {
+          const t = el.textContent || '';
+          return /By\s*@/i.test(t) && t.length < 80 && !el.closest('[data-testid*="chat-message"]');
+        });
+        if (candidateBy.length > 0) {
+          candidateBy.sort((a, b) => (a.textContent || '').length - (b.textContent || '').length);
+          let curr = candidateBy[0];
+          while (curr && curr.parentElement && curr.parentElement !== document.body && curr.parentElement !== document.documentElement) {
+            const p = curr.parentElement;
+            if (p.querySelector('[data-testid*="chat-message"]') || p.clientHeight > 300 || p.offsetHeight > 300) {
+              chatHeader = curr;
+              break;
             }
-            if (chatHeader) break;
+            curr = p;
           }
         }
 
@@ -490,16 +508,24 @@
       }, { passive: true });
     }
 
-    // Batched 60-120 FPS requestAnimationFrame scheduler (prevents layout thrashing)
+    // Throttled high-performance requestAnimationFrame scheduler (prevents layout thrashing)
     let purgeScheduled = false;
+    let lastPurgeTime = 0;
+    const PURGE_THROTTLE_MS = 120; // 120ms debounce during heavy DOM mutation bursts to preserve CPU for page rendering
+
     function scheduleBatchedPurge() {
       if (purgeScheduled) return;
       purgeScheduled = true;
-      requestAnimationFrame(() => {
-        purgeScheduled = false;
-        purgeAdElements(document);
-        if (isYouTube) handleVideoAds();
-      });
+      const now = performance.now();
+      const delay = Math.max(0, PURGE_THROTTLE_MS - (now - lastPurgeTime));
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          purgeScheduled = false;
+          lastPurgeTime = performance.now();
+          purgeAdElements(document);
+          if (isYouTube) handleVideoAds();
+        });
+      }, delay);
     }
 
     // Dynamic MutationObserver with batched frame updates for silky smooth scrolling
