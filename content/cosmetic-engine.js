@@ -26,10 +26,33 @@
   } catch (e) {}
 
   function initCosmeticEngine(dynamicSelectors = [], initialCustomFilters = []) {
+    const hostname = (window.location.hostname || '').toLowerCase();
+    const href = (window.location.href || '').toLowerCase();
+    const path = (window.location.pathname || '').toLowerCase();
+    const title = (document.title || '').toLowerCase();
+
+    // Security Verification, CAPTCHA & Anti-Bot Pure Passthrough Guard
+    if (
+      hostname.includes('challenges.cloudflare.com') ||
+      hostname.includes('recaptcha') ||
+      hostname.includes('hcaptcha') ||
+      hostname.includes('turnstile') ||
+      href.includes('cf-chl') ||
+      href.includes('__cf_chl') ||
+      href.includes('turnstile') ||
+      path.includes('/cdn-cgi/challenge-platform') ||
+      title.includes('just a moment') ||
+      title.includes('verifying your request') ||
+      title.includes('attention required') ||
+      title.includes('security check')
+    ) {
+      return;
+    }
+
     let blockedCount = 0;
-    const isYouTube = window.location.hostname.includes('youtube.com');
-    const isTwitch = window.location.hostname.includes('twitch.tv');
-    const isCharacterAI = window.location.hostname.includes('character.ai') || window.location.hostname.endsWith('c.ai');
+    const isYouTube = hostname.includes('youtube.com');
+    const isTwitch = hostname.includes('twitch.tv');
+    const isCharacterAI = hostname.includes('character.ai') || hostname.endsWith('c.ai');
 
     // Inject dynamic CSS rules for newly auto-updated ad selectors
     if (dynamicSelectors.length > 0) {

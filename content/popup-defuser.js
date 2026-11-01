@@ -46,9 +46,68 @@
     nativeFunctions.add(Function.prototype.toString);
   } catch (e) {}
 
-  // Exclude productivity, AI, messaging, and graphics editing suites from canvas/media farbling
-  // so that screenshot pasting, image sharing, voice/video calls, and TTS speech work with 100% native fidelity
+  // ==========================================================================
+  // Layer 0: Security Verification, CAPTCHA & Anti-Bot Pure Passthrough Guard
+  // Cloudflare Turnstile, Google Verification, reCAPTCHA, hCaptcha, and challenge frames
+  // must run in 100% pure native Chrome with zero interference, proxies, or farbling.
+  // ==========================================================================
   const currentHost = (window.location.hostname || '').toLowerCase();
+  const currentPath = (window.location.pathname || '').toLowerCase();
+  const currentHref = (window.location.href || '').toLowerCase();
+
+  const isSecurityVerificationPage = (function() {
+    const challengeHosts = [
+      'challenges.cloudflare.com',
+      'cloudflare.com',
+      'turnstile',
+      'recaptcha.net',
+      'hcaptcha.com',
+      'arkoselabs.com',
+      'funcaptcha.com',
+      'datadome.co',
+      'kasada.io',
+      'perimeterx.net',
+      'humanpresence.io'
+    ];
+    if (challengeHosts.some(h => currentHost.includes(h))) return true;
+
+    if (currentHost.includes('google.') && (currentPath.includes('/sorry') || currentPath.includes('/recaptcha') || currentHref.includes('recaptcha'))) {
+      return true;
+    }
+
+    if (
+      currentPath.includes('/cdn-cgi/challenge-platform') ||
+      currentPath.includes('/challenge-platform') ||
+      currentHref.includes('__cf_chl') ||
+      currentHref.includes('cf-chl') ||
+      currentHref.includes('cf_chl') ||
+      currentHref.includes('turnstile')
+    ) {
+      return true;
+    }
+
+    try {
+      const title = (document.title || '').toLowerCase();
+      if (
+        title.includes('just a moment') ||
+        title.includes('verifying your request') ||
+        title.includes('attention required') ||
+        title.includes('security check')
+      ) {
+        return true;
+      }
+    } catch (e) {}
+
+    return false;
+  })();
+
+  if (isSecurityVerificationPage) {
+    // Pure native execution for all verification challenges
+    return;
+  }
+
+  // Exclude productivity, AI, messaging, graphics editing suites, and security services from canvas/media farbling
+  // so that screenshot pasting, image sharing, voice/video calls, and TTS speech work with 100% native fidelity
   const isProductivityOrMediaSite = [
     'whatsapp.com',
     'telegram.org',
@@ -59,6 +118,21 @@
     'meet.google.com',
     'docs.google.com',
     'drive.google.com',
+    'google.com',
+    'gstatic.com',
+    'challenges.cloudflare.com',
+    'cloudflare.com',
+    'recaptcha.net',
+    'hcaptcha.com',
+    'arkoselabs.com',
+    'funcaptcha.com',
+    'datadome.co',
+    'kasada.io',
+    'perimeterx.net',
+    'humanpresence.io',
+    'apple.com',
+    'microsoft.com',
+    'live.com',
     'figma.com',
     'canva.com',
     'photopea.com',
@@ -201,17 +275,10 @@
   // Scrambles hardware/browser signatures across Reddit, FingerprintJS, etc.
   // ==========================================================================
 
-  // 1. Hardware Concurrency Normalization (masks CPU core count to standard 8)
+  // 1. Hardware Concurrency Normalization (masks CPU core count without creating illegal own-properties)
   try {
-    Object.defineProperty(Navigator.prototype, 'hardwareConcurrency', {
-      get: makeNative(function() { return 8; }, 'get hardwareConcurrency'),
-      configurable: true,
-      enumerable: true
-    });
-  } catch (e) {}
-  try {
-    if (typeof navigator !== 'undefined') {
-      Object.defineProperty(navigator, 'hardwareConcurrency', {
+    if (typeof navigator !== 'undefined' && navigator.hardwareConcurrency < 2 && !isProductivityOrMediaSite) {
+      Object.defineProperty(Navigator.prototype, 'hardwareConcurrency', {
         get: makeNative(function() { return 8; }, 'get hardwareConcurrency'),
         configurable: true,
         enumerable: true
@@ -219,17 +286,10 @@
     }
   } catch (e) {}
 
-  // 2. Device Memory Normalization (masks RAM to standard 8GB bucket)
+  // 2. Device Memory Normalization (masks RAM to standard bucket without creating illegal own-properties)
   try {
-    Object.defineProperty(Navigator.prototype, 'deviceMemory', {
-      get: makeNative(function() { return 8; }, 'get deviceMemory'),
-      configurable: true,
-      enumerable: true
-    });
-  } catch (e) {}
-  try {
-    if (typeof navigator !== 'undefined') {
-      Object.defineProperty(navigator, 'deviceMemory', {
+    if (typeof navigator !== 'undefined' && navigator.deviceMemory < 2 && !isProductivityOrMediaSite) {
+      Object.defineProperty(Navigator.prototype, 'deviceMemory', {
         get: makeNative(function() { return 8; }, 'get deviceMemory'),
         configurable: true,
         enumerable: true
@@ -239,7 +299,7 @@
 
   // 3. Battery API Neutralization (prevents battery-drain tracking vectors)
   try {
-    if (typeof navigator.getBattery === 'function') {
+    if (typeof navigator.getBattery === 'function' && !isProductivityOrMediaSite) {
       navigator.getBattery = makeNative(function() {
         return Promise.resolve({
           charging: true,
@@ -258,41 +318,33 @@
     }
   } catch (e) {}
 
-  // 4. Automation & Bot Signature Shield (prevents webdriver detection & fingerprint flags)
+  // 4. Automation & Bot Signature Shield (preserves native C++ getter when already clean)
   try {
-    Object.defineProperty(Navigator.prototype, 'webdriver', {
-      get: makeNative(function() { return false; }, 'get webdriver'),
-      configurable: true,
-      enumerable: true
-    });
-    Object.defineProperty(Navigator.prototype, 'pdfViewerEnabled', {
-      get: makeNative(function() { return true; }, 'get pdfViewerEnabled'),
-      configurable: true,
-      enumerable: true
-    });
+    if (typeof navigator !== 'undefined' && navigator.webdriver === true) {
+      Object.defineProperty(Navigator.prototype, 'webdriver', {
+        get: makeNative(function() { return false; }, 'get webdriver'),
+        configurable: true,
+        enumerable: true
+      });
+    }
+    if (typeof Navigator.prototype.pdfViewerEnabled === 'undefined') {
+      Object.defineProperty(Navigator.prototype, 'pdfViewerEnabled', {
+        get: makeNative(function() { return true; }, 'get pdfViewerEnabled'),
+        configurable: true,
+        enumerable: true
+      });
+    }
   } catch (e) {}
 
-  // 5. Screen & Color Depth Standardization (prevents atypical display bucketing)
+  // 5. Screen & Color Depth Standardization (preserves prototype chain without illegal own-properties)
   try {
-    Object.defineProperty(Screen.prototype, 'colorDepth', {
-      get: makeNative(function() { return 24; }, 'get colorDepth'),
-      configurable: true,
-      enumerable: true
-    });
-    Object.defineProperty(Screen.prototype, 'pixelDepth', {
-      get: makeNative(function() { return 24; }, 'get pixelDepth'),
-      configurable: true,
-      enumerable: true
-    });
-  } catch (e) {}
-  try {
-    if (typeof screen !== 'undefined') {
-      Object.defineProperty(screen, 'colorDepth', {
+    if (typeof screen !== 'undefined' && screen.colorDepth < 24 && !isProductivityOrMediaSite) {
+      Object.defineProperty(Screen.prototype, 'colorDepth', {
         get: makeNative(function() { return 24; }, 'get colorDepth'),
         configurable: true,
         enumerable: true
       });
-      Object.defineProperty(screen, 'pixelDepth', {
+      Object.defineProperty(Screen.prototype, 'pixelDepth', {
         get: makeNative(function() { return 24; }, 'get pixelDepth'),
         configurable: true,
         enumerable: true
@@ -302,7 +354,7 @@
 
   // 6. Network Jitter Normalization (neutralizes connection timing fingerprinting via Proxy)
   try {
-    if (typeof navigator !== 'undefined' && 'connection' in Navigator.prototype) {
+    if (typeof navigator !== 'undefined' && 'connection' in Navigator.prototype && !isProductivityOrMediaSite) {
       const realConn = navigator.connection;
       if (realConn) {
         const connectionProxy = new Proxy(realConn, {
@@ -1103,20 +1155,22 @@
     // 7. Cookiebot
     window.Cookiebot = window.Cookiebot || createSafeProxy('Cookiebot');
 
-    // 8. Google Analytics & Google Tag Manager & gtag
-    window.ga = window.ga || noopFn;
-    window._gaq = window._gaq || [];
-    window._gaq.push = window._gaq.push || noopFn;
-    window.GoogleAnalyticsObject = window.GoogleAnalyticsObject || 'ga';
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push = window.dataLayer.push || function() { return Array.prototype.push.apply(this, arguments); };
-    window.gtag = window.gtag || makeNative(function() {
-      if (window.dataLayer && typeof window.dataLayer.push === 'function') {
-        window.dataLayer.push(arguments);
-      }
-      return noopFn;
-    }, 'gtag');
-    window.google_tag_manager = window.google_tag_manager || createSafeProxy('google_tag_manager');
+    // 8. Google Analytics & Google Tag Manager & gtag (never stub on Google/verification domains)
+    if (!currentHost.includes('google.') && !currentHost.includes('gstatic.') && !currentHost.includes('recaptcha')) {
+      window.ga = window.ga || noopFn;
+      window._gaq = window._gaq || [];
+      window._gaq.push = window._gaq.push || noopFn;
+      window.GoogleAnalyticsObject = window.GoogleAnalyticsObject || 'ga';
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push = window.dataLayer.push || function() { return Array.prototype.push.apply(this, arguments); };
+      window.gtag = window.gtag || makeNative(function() {
+        if (window.dataLayer && typeof window.dataLayer.push === 'function') {
+          window.dataLayer.push(arguments);
+        }
+        return noopFn;
+      }, 'gtag');
+      window.google_tag_manager = window.google_tag_manager || createSafeProxy('google_tag_manager');
+    }
 
     // 9. Criteo & Retargeting
     window.criteo_q = window.criteo_q || [];

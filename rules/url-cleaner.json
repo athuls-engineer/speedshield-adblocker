@@ -65,7 +65,12 @@
         "square.com",
         "cash.app",
         "authorize.net",
-        "braintreegateway.com"
+        "braintreegateway.com",
+        "cloudflare.com",
+        "challenges.cloudflare.com",
+        "recaptcha.net",
+        "hcaptcha.com",
+        "google.com"
       ]
     }
   },
