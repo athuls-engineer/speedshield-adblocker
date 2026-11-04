@@ -36,6 +36,10 @@
   } catch (e) {}
 
   function initCosmeticEngine(dynamicSelectors = [], initialCustomFilters = [], isWhitelisted = false, shieldEnabled = true, hudEnabled = true) {
+    let blockedCount = 0;
+    let updateHUDCount = () => {};
+    let toggleHUDPanel = () => {};
+
     const hostname = (window.location.hostname || '').toLowerCase();
     const href = (window.location.href || '').toLowerCase();
     const path = (window.location.pathname || '').toLowerCase();
@@ -61,7 +65,11 @@
 
     // Initialize In-Page Floating HUD on top-level pages
     if (window === window.top && hudEnabled !== false) {
-      initInPageHUD(isWhitelisted, shieldEnabled, hostname);
+      try {
+        initInPageHUD(isWhitelisted, shieldEnabled, hostname);
+      } catch (err) {
+        console.warn('[SpeedShield] In-page HUD notice:', err);
+      }
     }
 
     // If extension is globally paused or site is whitelisted, skip ad-blocking DOM filters
@@ -69,7 +77,6 @@
       return;
     }
 
-    let blockedCount = 0;
     const isYouTube = hostname.includes('youtube.com');
     const isTwitch = hostname.includes('twitch.tv');
     const isCharacterAI = hostname.includes('character.ai') || hostname.endsWith('c.ai');
@@ -875,15 +882,12 @@
     // In-Page Floating Shield Widget (Split-Screen & Vertical Tabs HUD)
     // Allows full uBlock Origin control even when browser toolbar collapses
     // ========================================================================
-    let updateHUDCount = () => {};
-    let toggleHUDPanel = () => {};
-
     function initInPageHUD(isWhitelisted, shieldEnabled, hostname) {
       if (document.getElementById('speedshield-hud-host')) return;
 
       const host = document.createElement('div');
       host.id = 'speedshield-hud-host';
-      host.style.cssText = 'all: initial !important; position: fixed !important; z-index: 2147483647 !important; pointer-events: none !important;';
+      host.style.cssText = 'all: initial !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 0 !important; height: 0 !important; z-index: 2147483647 !important; pointer-events: none !important; overflow: visible !important; display: block !important;';
       const shadow = host.attachShadow({ mode: 'open' });
 
       const style = document.createElement('style');
@@ -1355,15 +1359,21 @@
 
       // Attach host to document
       function attachHost() {
-        if (document.body) {
+        if (!document.getElementById('speedshield-hud-host')) {
+          if (document.body) {
+            document.body.appendChild(host);
+          } else if (document.documentElement) {
+            document.documentElement.appendChild(host);
+          }
+        } else if (document.body && host.parentElement !== document.body) {
           document.body.appendChild(host);
-        } else if (document.documentElement) {
-          document.documentElement.appendChild(host);
-        } else {
-          document.addEventListener('DOMContentLoaded', attachHost, { once: true });
         }
       }
       attachHost();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', attachHost, { once: true });
+        window.addEventListener('load', attachHost, { once: true });
+      }
     }
   }
 })();
