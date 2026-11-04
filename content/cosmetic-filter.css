@@ -531,9 +531,32 @@ html[class*="sp-message-open"] {
   overflow: auto !important;
 }
 
-/* Character.AI Plus Promo Hiding */
-[class*="cai-plus"] {
+/* ==========================================================================
+   Character.AI & AI Tools: Clean Banner Ad & Promo Removal
+   ========================================================================== */
+[class*="cai-plus"],
+[class*="plus-offer"],
+[class*="promo-banner"],
+div[data-testid*="ad-banner"],
+aside[class*="ad" i],
+div[class*="ad-banner" i],
+div[class*="banner-ad" i],
+a[href*="/plus"],
+a[href*="c.ai/plus"],
+a[href*="character.ai/plus"],
+div:has(> a[href*="c.ai/plus"]),
+div:has(> a[href*="character.ai/plus"]),
+div:has(> [class*="cai-plus"]),
+div:has(> [class*="plus-offer"]),
+div:has(> [class*="promo-banner"]),
+div:has(> div[data-testid*="ad-banner"]) {
   display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
 }
 
 /* ==========================================================================

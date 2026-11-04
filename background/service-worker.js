@@ -103,7 +103,9 @@ const MODERN_COSMETIC_SELECTORS = [
   '[class*="plus-offer"]',
   '[class*="promo-banner"]',
   '[class*="banner-ad"]',
-  'div[data-testid*="ad-banner"]'
+  'div[data-testid*="ad-banner"]',
+  'a[href*="c.ai/plus"]',
+  'a[href*="character.ai/plus"]'
 ];
 
 // Per-tab blocked request tracker
@@ -169,11 +171,12 @@ if (chrome.contextMenus && chrome.contextMenus.onClicked) {
         toggleDomainWhitelist(url.hostname.toLowerCase(), tab.id);
       } catch (e) {}
     } else if (info.menuItemId === 'speedshield_open_dashboard') {
-      if (tab && tab.id) {
-        chrome.tabs.sendMessage(tab.id, { action: 'toggle_hud' }).catch(() => {});
-      }
       if (chrome.action && typeof chrome.action.openPopup === 'function') {
-        chrome.action.openPopup().catch(() => {});
+        chrome.action.openPopup().catch(() => {
+          if (chrome.runtime.openOptionsPage) chrome.runtime.openOptionsPage();
+        });
+      } else if (chrome.runtime.openOptionsPage) {
+        chrome.runtime.openOptionsPage();
       }
     }
   });
@@ -438,13 +441,7 @@ async function checkAndPerformUpdate(forced = false) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout per feed
-      let response;
-      try {
-        response = await fetch(url, { signal: controller.signal });
-      } catch (fetchErr) {
-        clearTimeout(timeoutId);
-        continue;
-      }
+      const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timeoutId);
 
       if (response.ok) {
@@ -558,7 +555,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.action === 'get_tab_stats') {
-    const tabId = (sender && sender.tab && sender.tab.id) ? sender.tab.id : message.tabId;
+    const tabId = message.tabId;
     const count = tabBlockedCounts.get(tabId) || 0;
     chrome.storage.local.get(
       ['shield_enabled', 'whitelist', 'total_blocked', 'total_zapped', 'last_updated', 'dynamic_rules_count', 'update_interval_minutes', 'cookie_shield_enabled', 'url_cleaner_enabled', 'custom_cosmetic_filters'],
@@ -650,16 +647,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }).catch((err) => {
       sendResponse({ success: false, reason: err.message });
     });
-    return true;
-  }
-
-  if (message.action === 'open_dashboard' || message.action === 'speedshield_open_dashboard') {
-    if (chrome.runtime.openOptionsPage) {
-      chrome.runtime.openOptionsPage();
-    } else {
-      chrome.tabs.create({ url: chrome.runtime.getURL('options/options.html') });
-    }
-    sendResponse({ success: true });
     return true;
   }
 });
