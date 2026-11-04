@@ -10,22 +10,32 @@
   if (!chrome.runtime || !chrome.runtime.id) return;
 
   try {
-    // Check if extension is enabled or site is whitelisted
-    chrome.storage.local.get(['shield_enabled', 'whitelist', 'dynamic_cosmetic_selectors', 'custom_cosmetic_filters'], (data) => {
+    chrome.storage.local.get([
+      'shield_enabled',
+      'whitelist',
+      'dynamic_cosmetic_selectors',
+      'custom_cosmetic_filters',
+      'hud_enabled'
+    ], (data) => {
       if (chrome.runtime.lastError || !data) return;
-      if (data.shield_enabled === false) return;
 
       const hostname = (window.location.hostname || '').toLowerCase();
       const whitelist = data.whitelist || [];
-      if (whitelist.some(domain => hostname === domain || hostname.endsWith('.' + domain))) {
-        return;
-      }
+      const isWhitelisted = whitelist.some(domain => hostname === domain || hostname.endsWith('.' + domain));
+      const shieldEnabled = data.shield_enabled !== false;
+      const hudEnabled = data.hud_enabled !== false;
 
-      initCosmeticEngine(data.dynamic_cosmetic_selectors || [], data.custom_cosmetic_filters || []);
+      initCosmeticEngine(
+        data.dynamic_cosmetic_selectors || [],
+        data.custom_cosmetic_filters || [],
+        isWhitelisted,
+        shieldEnabled,
+        hudEnabled
+      );
     });
   } catch (e) {}
 
-  function initCosmeticEngine(dynamicSelectors = [], initialCustomFilters = []) {
+  function initCosmeticEngine(dynamicSelectors = [], initialCustomFilters = [], isWhitelisted = false, shieldEnabled = true, hudEnabled = true) {
     const hostname = (window.location.hostname || '').toLowerCase();
     const href = (window.location.href || '').toLowerCase();
     const path = (window.location.pathname || '').toLowerCase();
@@ -46,6 +56,16 @@
       title.includes('attention required') ||
       title.includes('security check')
     ) {
+      return;
+    }
+
+    // Initialize In-Page Floating HUD on top-level pages
+    if (window === window.top && hudEnabled !== false) {
+      initInPageHUD(isWhitelisted, shieldEnabled, hostname);
+    }
+
+    // If extension is globally paused or site is whitelisted, skip ad-blocking DOM filters
+    if (isWhitelisted || !shieldEnabled) {
       return;
     }
 
@@ -77,6 +97,10 @@
     // Report blocked ad elements to background for tab stats
     function reportBlocked(count) {
       if (count <= 0) return;
+      blockedCount += count;
+      if (typeof updateHUDCount === 'function') {
+        updateHUDCount(blockedCount);
+      }
       if (!chrome.runtime || !chrome.runtime.id) return;
       try {
         chrome.runtime.sendMessage({
@@ -833,13 +857,513 @@
       window.removeEventListener('contextmenu', onZapperContextMenu, { capture: true });
     }
 
-    // Message listener for Element Zapper
+    // Message listener for Element Zapper and HUD Toggle
     chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       if (msg.action === 'activate_element_picker') {
         activateZapper();
         sendResponse({ status: 'active' });
+      } else if (msg.action === 'toggle_hud') {
+        if (typeof toggleHUDPanel === 'function') {
+          toggleHUDPanel();
+          sendResponse({ status: 'toggled' });
+        }
       }
       return true;
     });
+
+    // ========================================================================
+    // In-Page Floating Shield Widget (Split-Screen & Vertical Tabs HUD)
+    // Allows full uBlock Origin control even when browser toolbar collapses
+    // ========================================================================
+    let updateHUDCount = () => {};
+    let toggleHUDPanel = () => {};
+
+    function initInPageHUD(isWhitelisted, shieldEnabled, hostname) {
+      if (document.getElementById('speedshield-hud-host')) return;
+
+      const host = document.createElement('div');
+      host.id = 'speedshield-hud-host';
+      host.style.cssText = 'all: initial !important; position: fixed !important; z-index: 2147483647 !important; pointer-events: none !important;';
+      const shadow = host.attachShadow({ mode: 'open' });
+
+      const style = document.createElement('style');
+      style.textContent = `
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          user-select: none;
+        }
+        .hud-pill {
+          position: fixed;
+          bottom: 24px;
+          right: 24px;
+          height: 34px;
+          padding: 0 12px;
+          background: rgba(24, 27, 34, 0.94);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          border-radius: 17px;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.2);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          cursor: grab;
+          pointer-events: auto;
+          transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+          z-index: 2147483646;
+        }
+        .hud-pill:hover {
+          transform: scale(1.04);
+          border-color: #1c68d2;
+          box-shadow: 0 6px 20px rgba(28, 104, 210, 0.4);
+        }
+        .hud-pill:active {
+          cursor: grabbing;
+        }
+        .shield-icon {
+          width: 16px;
+          height: 16px;
+          fill: ${isWhitelisted ? '#888' : '#1c68d2'};
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+        }
+        .badge-count {
+          font-size: 12px;
+          font-weight: 700;
+          color: ${isWhitelisted ? '#888' : '#fff'};
+          line-height: 1;
+          min-width: 14px;
+          text-align: center;
+        }
+        .pill-handle {
+          font-size: 11px;
+          color: #6e7681;
+          letter-spacing: -1px;
+        }
+        .hud-panel {
+          position: fixed;
+          bottom: 66px;
+          right: 24px;
+          width: 240px;
+          background: #1e1e1e;
+          border: 1px solid #333333;
+          border-radius: 8px;
+          box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85);
+          color: #e0e0e0;
+          pointer-events: auto;
+          display: none;
+          flex-direction: column;
+          overflow: hidden;
+          z-index: 2147483647;
+          animation: hudFadeIn 0.15s ease-out;
+        }
+        @keyframes hudFadeIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .panel-header {
+          background: #181818;
+          padding: 8px 12px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-bottom: 1px solid #2a2a2a;
+          font-size: 11px;
+          font-weight: 600;
+          color: #888;
+        }
+        .panel-title {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          color: #ccc;
+        }
+        .panel-logo {
+          width: 14px;
+          height: 14px;
+          fill: #1c68d2;
+        }
+        .panel-close {
+          background: none;
+          border: none;
+          color: #888;
+          font-size: 14px;
+          cursor: pointer;
+          padding: 0 4px;
+          line-height: 1;
+        }
+        .panel-close:hover {
+          color: #fff;
+        }
+        .domain-box {
+          padding: 10px 12px 4px;
+          text-align: center;
+        }
+        .domain-name {
+          font-size: 13px;
+          font-weight: 700;
+          color: #fff;
+          word-break: break-all;
+        }
+        .domain-name.strikethrough {
+          text-decoration: line-through;
+          color: #888;
+        }
+        .domain-status {
+          font-size: 10px;
+          font-weight: 600;
+          margin-top: 2px;
+          text-transform: uppercase;
+        }
+        .domain-status.on {
+          color: #3fb950;
+        }
+        .domain-status.off {
+          color: #f85149;
+        }
+        .power-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 12px 0 10px;
+        }
+        .power-btn {
+          width: 64px;
+          height: 64px;
+          border-radius: 50%;
+          border: 2px solid ${isWhitelisted ? '#444' : '#1c68d2'};
+          background: ${isWhitelisted ? '#2c2c2c' : 'linear-gradient(135deg, #1c68d2, #1351a8)'};
+          box-shadow: ${isWhitelisted ? 'none' : '0 0 16px rgba(28, 104, 210, 0.45)'};
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.15s ease, background 0.15s ease;
+        }
+        .power-btn:hover {
+          transform: scale(1.06);
+        }
+        .power-icon {
+          width: 28px;
+          height: 28px;
+          fill: ${isWhitelisted ? '#777' : '#ffffff'};
+        }
+        .stats-table {
+          margin: 6px 12px 10px;
+          background: #252525;
+          border-radius: 6px;
+          padding: 8px 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+          font-size: 11px;
+        }
+        .stat-row {
+          display: flex;
+          justify-content: space-between;
+          color: #aaa;
+        }
+        .stat-val {
+          font-weight: 700;
+          color: #fff;
+        }
+        .tools-row {
+          display: flex;
+          border-top: 1px solid #2a2a2a;
+          background: #181818;
+        }
+        .tool-btn {
+          flex: 1;
+          padding: 8px 4px;
+          background: none;
+          border: none;
+          color: #999;
+          font-size: 10px;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 3px;
+          transition: background 0.15s, color 0.15s;
+        }
+        .tool-btn:hover {
+          background: #262626;
+          color: #fff;
+        }
+        .tool-icon {
+          font-size: 13px;
+          line-height: 1;
+        }
+      `;
+      shadow.appendChild(style);
+
+      const pill = document.createElement('div');
+      pill.className = 'hud-pill';
+      pill.id = 'hudPill';
+      pill.title = 'SpeedShield Protection (Click to open, Alt+Shift+S, drag to move)';
+      pill.innerHTML = `
+        <div class="shield-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1 14.5l-3.5-3.5 1.41-1.41L11 13.67l5.59-5.59 1.41 1.41-7 7z"/></svg>
+        </div>
+        <span class="badge-count" id="pillCount">0</span>
+        <span class="pill-handle">⋮⋮</span>
+      `;
+      shadow.appendChild(pill);
+
+      const panel = document.createElement('div');
+      panel.className = 'hud-panel';
+      panel.id = 'hudPanel';
+      panel.innerHTML = `
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24" class="panel-logo"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1 14.5l-3.5-3.5 1.41-1.41L11 13.67l5.59-5.59 1.41 1.41-7 7z"/></svg>
+            SpeedShield
+          </div>
+          <button class="panel-close" id="panelClose" title="Close">✕</button>
+        </div>
+        <div class="domain-box">
+          <div class="domain-name ${isWhitelisted ? 'strikethrough' : ''}" id="domainName">${hostname}</div>
+          <div class="domain-status ${isWhitelisted ? 'off' : 'on'}">${isWhitelisted ? 'Protection Paused' : 'Protected'}</div>
+        </div>
+        <div class="power-container">
+          <button class="power-btn ${isWhitelisted ? 'whitelisted' : 'active'}" id="powerBtn" title="Click to toggle protection on ${hostname}">
+            <svg viewBox="0 0 24 24" class="power-icon"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42A6.92 6.92 0 0 1 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.47 1.28-4.63 3.21-5.86L6.79 4.72A8.963 8.963 0 0 0 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
+          </button>
+        </div>
+        <div class="stats-table">
+          <div class="stat-row">
+            <span>Requests blocked:</span>
+            <span class="stat-val" id="statPageCount">0</span>
+          </div>
+          <div class="stat-row">
+            <span>Since install:</span>
+            <span class="stat-val" id="statAllTime">--</span>
+          </div>
+        </div>
+        <div class="tools-row">
+          <button class="tool-btn" id="toolZap" title="Zap element on page (Alt+Z)">
+            <span class="tool-icon">⚡</span>
+            <span>Zap</span>
+          </button>
+          <button class="tool-btn" id="toolCookies" title="Toggle Cookie Shield">
+            <span class="tool-icon">🍪</span>
+            <span>Cookies</span>
+          </button>
+          <button class="tool-btn" id="toolCleaner" title="Toggle URL Cleaner">
+            <span class="tool-icon">🔗</span>
+            <span>Clean URLs</span>
+          </button>
+          <button class="tool-btn" id="toolOptions" title="Open Settings Dashboard">
+            <span class="tool-icon">⚙️</span>
+            <span>Settings</span>
+          </button>
+        </div>
+      `;
+      shadow.appendChild(panel);
+
+      // Restore saved position
+      try {
+        const savedPos = localStorage.getItem('speedshield_hud_pos');
+        if (savedPos) {
+          const { left, top } = JSON.parse(savedPos);
+          if (typeof left === 'number' && typeof top === 'number') {
+            const maxX = Math.max(10, window.innerWidth - 80);
+            const maxY = Math.max(10, window.innerHeight - 50);
+            pill.style.left = Math.min(Math.max(10, left), maxX) + 'px';
+            pill.style.top = Math.min(Math.max(10, top), maxY) + 'px';
+            pill.style.right = 'auto';
+            pill.style.bottom = 'auto';
+          }
+        }
+      } catch (e) {}
+
+      // Draggable logic
+      let isDragging = false;
+      let startX = 0, startY = 0;
+      let initialLeft = 0, initialTop = 0;
+      let hasMoved = false;
+
+      pill.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        isDragging = true;
+        hasMoved = false;
+        startX = e.clientX;
+        startY = e.clientY;
+        const rect = pill.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+      });
+
+      function onMouseMove(e) {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+          hasMoved = true;
+          const newLeft = Math.min(Math.max(5, initialLeft + dx), window.innerWidth - pill.offsetWidth - 5);
+          const newTop = Math.min(Math.max(5, initialTop + dy), window.innerHeight - pill.offsetHeight - 5);
+          pill.style.left = newLeft + 'px';
+          pill.style.top = newTop + 'px';
+          pill.style.right = 'auto';
+          pill.style.bottom = 'auto';
+        }
+      }
+
+      function onMouseUp(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+
+        if (hasMoved) {
+          const rect = pill.getBoundingClientRect();
+          try {
+            localStorage.setItem('speedshield_hud_pos', JSON.stringify({ left: rect.left, top: rect.top }));
+          } catch (e) {}
+        } else {
+          togglePanel();
+        }
+      }
+
+      function positionPanel() {
+        const pillRect = pill.getBoundingClientRect();
+        const panelWidth = 240;
+        const panelHeight = 220;
+
+        let left = pillRect.left;
+        if (left + panelWidth > window.innerWidth - 10) {
+          left = window.innerWidth - panelWidth - 10;
+        }
+        if (left < 10) left = 10;
+
+        let top = pillRect.top - panelHeight - 10;
+        if (top < 10) {
+          top = pillRect.bottom + 10;
+        }
+
+        panel.style.left = left + 'px';
+        panel.style.top = top + 'px';
+        panel.style.right = 'auto';
+        panel.style.bottom = 'auto';
+      }
+
+      function togglePanel() {
+        const isShown = panel.style.display === 'flex';
+        if (isShown) {
+          panel.style.display = 'none';
+        } else {
+          positionPanel();
+          panel.style.display = 'flex';
+          refreshStats();
+        }
+      }
+      toggleHUDPanel = togglePanel;
+
+      function refreshStats() {
+        if (!chrome.runtime || !chrome.runtime.id) return;
+        try {
+          chrome.runtime.sendMessage({ action: 'get_tab_stats' }, (data) => {
+            if (chrome.runtime.lastError || !data) return;
+            const count = Math.max(blockedCount, data.tabBlocked || 0);
+            updateCount(count);
+            const statAllTime = shadow.getElementById('statAllTime');
+            if (statAllTime && data.totalBlocked !== undefined) {
+              statAllTime.textContent = (data.totalBlocked).toLocaleString();
+            }
+          });
+        } catch (e) {}
+      }
+
+      function updateCount(c) {
+        const pillCount = shadow.getElementById('pillCount');
+        const statPageCount = shadow.getElementById('statPageCount');
+        if (pillCount) pillCount.textContent = String(c);
+        if (statPageCount) statPageCount.textContent = String(c);
+      }
+      updateHUDCount = updateCount;
+
+      // Event Listeners for panel
+      shadow.getElementById('panelClose').addEventListener('click', (e) => {
+        e.stopPropagation();
+        panel.style.display = 'none';
+      });
+
+      shadow.getElementById('powerBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!chrome.runtime || !chrome.runtime.id) return;
+        chrome.runtime.sendMessage({ action: 'toggle_whitelist', domain: hostname }, () => {
+          window.location.reload();
+        });
+      });
+
+      shadow.getElementById('toolZap').addEventListener('click', (e) => {
+        e.stopPropagation();
+        panel.style.display = 'none';
+        activateZapper();
+      });
+
+      shadow.getElementById('toolCookies').addEventListener('click', (e) => {
+        e.stopPropagation();
+        chrome.runtime.sendMessage({ action: 'toggle_cookie_shield' }, (res) => {
+          showToast(res && res.cookieShieldEnabled ? '🍪 Cookie Shield Enabled' : '🍪 Cookie Shield Disabled');
+        });
+      });
+
+      shadow.getElementById('toolCleaner').addEventListener('click', (e) => {
+        e.stopPropagation();
+        chrome.runtime.sendMessage({ action: 'toggle_url_cleaner' }, (res) => {
+          showToast(res && res.urlCleanerEnabled ? '🔗 URL Cleaner Enabled' : '🔗 URL Cleaner Disabled');
+        });
+      });
+
+      shadow.getElementById('toolOptions').addEventListener('click', (e) => {
+        e.stopPropagation();
+        panel.style.display = 'none';
+        if (chrome.runtime.openOptionsPage) {
+          chrome.runtime.openOptionsPage();
+        }
+      });
+
+      // Global window click to dismiss panel when clicking outside
+      window.addEventListener('mousedown', (e) => {
+        if (panel.style.display === 'flex') {
+          const path = e.composedPath ? e.composedPath() : [];
+          if (!path.includes(host)) {
+            panel.style.display = 'none';
+          }
+        }
+      });
+
+      // Keyboard shortcut listener on page: Alt+Shift+S or Alt+S
+      window.addEventListener('keydown', (e) => {
+        if (e.altKey && (e.code === 'KeyS' || e.key.toLowerCase() === 's')) {
+          e.preventDefault();
+          togglePanel();
+        }
+      }, { capture: true });
+
+      // Fetch initial count
+      refreshStats();
+
+      // Attach host to document
+      function attachHost() {
+        if (document.body) {
+          document.body.appendChild(host);
+        } else if (document.documentElement) {
+          document.documentElement.appendChild(host);
+        } else {
+          document.addEventListener('DOMContentLoaded', attachHost, { once: true });
+        }
+      }
+      attachHost();
+    }
   }
 })();

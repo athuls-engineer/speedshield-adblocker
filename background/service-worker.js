@@ -171,12 +171,11 @@ if (chrome.contextMenus && chrome.contextMenus.onClicked) {
         toggleDomainWhitelist(url.hostname.toLowerCase(), tab.id);
       } catch (e) {}
     } else if (info.menuItemId === 'speedshield_open_dashboard') {
+      if (tab && tab.id) {
+        chrome.tabs.sendMessage(tab.id, { action: 'toggle_hud' }).catch(() => {});
+      }
       if (chrome.action && typeof chrome.action.openPopup === 'function') {
-        chrome.action.openPopup().catch(() => {
-          if (chrome.runtime.openOptionsPage) chrome.runtime.openOptionsPage();
-        });
-      } else if (chrome.runtime.openOptionsPage) {
-        chrome.runtime.openOptionsPage();
+        chrome.action.openPopup().catch(() => {});
       }
     }
   });
@@ -555,7 +554,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.action === 'get_tab_stats') {
-    const tabId = message.tabId;
+    const tabId = (sender && sender.tab && sender.tab.id) ? sender.tab.id : message.tabId;
     const count = tabBlockedCounts.get(tabId) || 0;
     chrome.storage.local.get(
       ['shield_enabled', 'whitelist', 'total_blocked', 'total_zapped', 'last_updated', 'dynamic_rules_count', 'update_interval_minutes', 'cookie_shield_enabled', 'url_cleaner_enabled', 'custom_cosmetic_filters'],

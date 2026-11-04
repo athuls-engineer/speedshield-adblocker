@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const cookieShieldToggle = document.getElementById('cookieShieldToggle');
   const urlCleanerToggle = document.getElementById('urlCleanerToggle');
+  const hudToggle = document.getElementById('hudToggle');
 
   const customFilterInput = document.getElementById('customFilterInput');
   const addCustomFilterBtn = document.getElementById('addCustomFilterBtn');
@@ -37,7 +38,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     'custom_cosmetic_filters',
     'total_blocked',
     'cookie_shield_enabled',
-    'url_cleaner_enabled'
+    'url_cleaner_enabled',
+    'hud_enabled'
   ]);
 
   if (cookieShieldToggle) {
@@ -53,6 +55,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     urlCleanerToggle.addEventListener('change', async () => {
       await chrome.storage.local.set({ url_cleaner_enabled: urlCleanerToggle.checked });
       chrome.runtime.sendMessage({ action: 'toggle_url_cleaner' });
+    });
+  }
+
+  if (hudToggle) {
+    hudToggle.checked = data.hud_enabled !== false;
+    hudToggle.addEventListener('change', async () => {
+      await chrome.storage.local.set({ hud_enabled: hudToggle.checked });
     });
   }
 
