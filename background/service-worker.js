@@ -440,7 +440,13 @@ async function checkAndPerformUpdate(forced = false) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout per feed
-      const response = await fetch(url, { signal: controller.signal });
+      let response;
+      try {
+        response = await fetch(url, { signal: controller.signal });
+      } catch (fetchErr) {
+        clearTimeout(timeoutId);
+        continue;
+      }
       clearTimeout(timeoutId);
 
       if (response.ok) {

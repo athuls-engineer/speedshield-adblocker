@@ -46,6 +46,11 @@
     const path = (window.location.pathname || '').toLowerCase();
     const title = (document.title || '').toLowerCase();
 
+    const isYouTube = hostname.includes('youtube.com');
+    const isTwitch = hostname.includes('twitch.tv');
+    const isCharacterAI = hostname.includes('character.ai') || hostname.endsWith('c.ai');
+
+
     // Security Verification, CAPTCHA & Anti-Bot Pure Passthrough Guard
     if (
       hostname.includes('challenges.cloudflare.com') ||
@@ -78,9 +83,6 @@
       return;
     }
 
-    const isYouTube = hostname.includes('youtube.com');
-    const isTwitch = hostname.includes('twitch.tv');
-    const isCharacterAI = hostname.includes('character.ai') || hostname.endsWith('c.ai');
 
     // Character.AI Zero-Breakage Layout Guard:
     // Character.AI runs a complex React virtualized chat stream with streaming tokens.
