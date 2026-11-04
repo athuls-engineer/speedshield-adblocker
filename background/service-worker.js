@@ -154,7 +154,7 @@ function setupContextMenus() {
       });
       chrome.contextMenus.create({
         id: 'speedshield_open_dashboard',
-        title: '⚙️ SpeedShield: Open dashboard / settings',
+        title: '🛡️ SpeedShield: Open popup (Alt+Shift+S)',
         contexts: ['all']
       });
     });
@@ -171,7 +171,11 @@ if (chrome.contextMenus && chrome.contextMenus.onClicked) {
         toggleDomainWhitelist(url.hostname.toLowerCase(), tab.id);
       } catch (e) {}
     } else if (info.menuItemId === 'speedshield_open_dashboard') {
-      if (chrome.runtime.openOptionsPage) {
+      if (chrome.action && typeof chrome.action.openPopup === 'function') {
+        chrome.action.openPopup().catch(() => {
+          if (chrome.runtime.openOptionsPage) chrome.runtime.openOptionsPage();
+        });
+      } else if (chrome.runtime.openOptionsPage) {
         chrome.runtime.openOptionsPage();
       }
     }
