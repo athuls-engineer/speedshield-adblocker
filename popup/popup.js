@@ -21,18 +21,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   const updateBtnText = document.getElementById('updateBtnText');
   const updateIcon = document.getElementById('updateIcon');
   const openSettingsBtn = document.getElementById('openSettingsBtn');
+  const dashboardBtn = document.getElementById('dashboardBtn');
+  const domainText = document.getElementById('domainText');
+  const reloadPromptBtn = document.getElementById('reloadPromptBtn');
 
   let currentDomain = '';
   let activeTabId = null;
 
-  // Open Options page
-  openSettingsBtn.addEventListener('click', () => {
+  // Open Options / Dashboard page
+  const openDashboard = () => {
     if (chrome.runtime.openOptionsPage) {
       chrome.runtime.openOptionsPage();
     } else {
       window.open(chrome.runtime.getURL('options/options.html'));
     }
-  });
+  };
+  if (openSettingsBtn) openSettingsBtn.addEventListener('click', openDashboard);
+  if (dashboardBtn) dashboardBtn.addEventListener('click', openDashboard);
+
+  // Reload prompt button listener
+  if (reloadPromptBtn) {
+    reloadPromptBtn.addEventListener('click', () => {
+      if (activeTabId) chrome.tabs.reload(activeTabId);
+      reloadPromptBtn.style.display = 'none';
+    });
+  }
 
   // Query Active Tab
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -44,12 +57,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentDomain = urlObj.hostname.toLowerCase();
       } else {
         currentDomain = '';
-        if (whitelistBtn) whitelistBtn.style.display = 'none';
+        if (whitelistBtn) whitelistBtn.style.opacity = '0.5';
         if (activateZapperBtn) activateZapperBtn.style.display = 'none';
       }
     } catch (e) {
       currentDomain = '';
     }
+  }
+
+  if (domainText) {
+    domainText.textContent = currentDomain || 'SpeedShield';
   }
 
   const updaterModeText = document.getElementById('updaterModeText');
@@ -96,21 +113,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function updateShieldUI(enabled) {
     if (enabled) {
-      statusBadge.textContent = 'PROTECTED';
-      statusBadge.className = 'status-badge active';
-      toggleStatusText.textContent = 'Ad & Tracker Shield';
-      toggleSubtitle.textContent = 'Active on all web traffic';
-      if (privacyStatusBar) {
-        privacyStatusBar.style.display = 'flex';
+      if (statusBadge) {
+        statusBadge.textContent = 'PROTECTED';
+        statusBadge.className = 'status-badge active';
+      }
+      if (toggleStatusText) toggleStatusText.textContent = 'Ad & Tracker Shield';
+      if (toggleSubtitle) toggleSubtitle.textContent = 'Active on all web traffic';
+      if (whitelistBtn) whitelistBtn.classList.remove('paused');
+      if (domainText && !whitelistBtn.classList.contains('whitelisted')) {
+        domainText.classList.remove('whitelisted');
       }
     } else {
-      statusBadge.textContent = 'PAUSED';
-      statusBadge.className = 'status-badge paused';
-      toggleStatusText.textContent = 'Shield is Paused';
-      toggleSubtitle.textContent = 'Ads & tracking allowed';
-      if (privacyStatusBar) {
-        privacyStatusBar.style.display = 'none';
+      if (statusBadge) {
+        statusBadge.textContent = 'PAUSED';
+        statusBadge.className = 'status-badge paused';
       }
+      if (toggleStatusText) toggleStatusText.textContent = 'Shield is Paused';
+      if (toggleSubtitle) toggleSubtitle.textContent = 'Ads & tracking allowed';
+      if (whitelistBtn) whitelistBtn.classList.add('paused');
+      if (domainText) domainText.classList.add('whitelisted');
     }
   }
 
@@ -118,11 +139,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!whitelistBtn) return;
     if (isWhitelisted) {
       whitelistBtn.classList.add('whitelisted');
-      whitelistBtnText.textContent = 'Blocked on Site';
+      if (domainText) domainText.classList.add('whitelisted');
+      whitelistBtn.title = 'SpeedShield is OFF on this site. Click to enable.';
+      if (whitelistBtnText) whitelistBtnText.textContent = 'Blocked on Site';
       if (whitelistIcon) whitelistIcon.textContent = '❌';
     } else {
       whitelistBtn.classList.remove('whitelisted');
-      whitelistBtnText.textContent = 'Allow on Site';
+      if (domainText) domainText.classList.remove('whitelisted');
+      whitelistBtn.title = 'SpeedShield is ON on this site. Click to disable.';
+      if (whitelistBtnText) whitelistBtnText.textContent = 'Allow on Site';
       if (whitelistIcon) whitelistIcon.textContent = '🛡️';
     }
   }
@@ -199,8 +224,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // Whitelist Toggle Click
-  whitelistBtn.addEventListener('click', () => {
+  // Whitelist Toggle Click (Iconic Big uBO Power Button)
+  whitelistBtn.addEventListener('click', (e) => {
+    // Ctrl-click or Cmd-click toggles global shield state
+    if (e.ctrlKey || e.metaKey) {
+      chrome.runtime.sendMessage({ action: 'toggle_shield' }, (res) => {
+        if (res) {
+          masterToggle.checked = res.shieldEnabled;
+          updateShieldUI(res.shieldEnabled);
+          if (activeTabId) chrome.tabs.reload(activeTabId);
+        }
+      });
+      return;
+    }
+
     if (!currentDomain) return;
     chrome.runtime.sendMessage({
       action: 'toggle_whitelist',
@@ -208,6 +245,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, (res) => {
       if (res) {
         updateWhitelistUI(res.isWhitelisted);
+        if (reloadPromptBtn) {
+          reloadPromptBtn.style.display = 'flex';
+        }
         if (activeTabId) {
           chrome.tabs.reload(activeTabId);
         }
@@ -245,10 +285,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (runPopupAuditBtn && popupAuditResults) {
     runPopupAuditBtn.addEventListener('click', async () => {
-      runPopupAuditBtn.disabled = true;
-      runPopupAuditBtn.textContent = 'Running...';
-      popupAuditResults.style.display = 'flex';
-      popupAuditResults.innerHTML = '<span style="color: var(--accent-cyan); font-size: 11px; text-align: center; padding: 4px;">⚡ Running live browser security checks...</span>';
+      if (popupAuditResults.style.display !== 'none' && popupAuditResults.innerHTML && !popupAuditResults.innerHTML.includes('Running')) {
+        popupAuditResults.style.display = 'none';
+        return;
+      }
+      popupAuditResults.style.display = 'block';
+      popupAuditResults.innerHTML = '<div style="color: #60a5fa; font-size: 11px; text-align: center; padding: 4px;">Testing browser security...</div>';
 
       const auditChecks = [];
 
@@ -528,25 +570,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       let itemsHtml = '';
       auditChecks.forEach(chk => {
         itemsHtml += `
-          <div class="popup-audit-item">
-            <span class="popup-audit-name" title="${escapeHtml(chk.name)}: ${escapeHtml(chk.actual)}">${escapeHtml(chk.name)}</span>
-            <span class="popup-audit-status ${chk.pass ? 'pass' : 'fail'}">${chk.pass ? '✔ PASS' : '✖ FAIL'}</span>
+          <div class="ubo-audit-item">
+            <span style="color: #bbb; max-width: 165px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(chk.name)}: ${escapeHtml(chk.actual)}">${escapeHtml(chk.name)}</span>
+            <span class="${chk.pass ? 'ubo-audit-pass' : ''}" style="${chk.pass ? 'color: #10b981;' : 'color: #ef4444; font-weight: 700;'}">${chk.pass ? 'PASS' : 'WARN'}</span>
           </div>
         `;
       });
 
       popupAuditResults.innerHTML = `
-        <div class="popup-audit-score-bar">
-          <span class="popup-audit-score">${passedCount}/${totalChecks} Shields Active</span>
-          <span class="popup-audit-badge">${scorePct}% (GRADE ${grade})</span>
+        <div style="display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #333; margin-bottom: 4px; font-weight: 700;">
+          <span style="color: #60a5fa;">Audit: ${passedCount}/${totalChecks} Active</span>
+          <span style="color: #10b981;">${scorePct}% (${grade})</span>
         </div>
-        <div class="popup-audit-list">
-          ${itemsHtml}
-        </div>
+        ${itemsHtml}
       `;
 
       runPopupAuditBtn.disabled = false;
-      runPopupAuditBtn.textContent = '⚡ Re-run';
     });
   }
 
