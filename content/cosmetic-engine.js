@@ -89,13 +89,23 @@
     if (isCharacterAI) {
       const cleanCharacterAI = () => {
         try {
-          const styled = document.querySelectorAll('[style*="sticky"], [data-speedshield-purged]');
+          const styled = document.querySelectorAll('[data-speedshield-purged], [style*="position: sticky"], [style*="display: none"], [style*="height: 0"]');
           for (let i = 0; i < styled.length; i++) {
             const el = styled[i];
-            delete el.dataset.speedshieldPurged;
-            el.style.removeProperty('position');
-            el.style.removeProperty('top');
-            el.style.removeProperty('z-index');
+            if (el.dataset.speedshieldPurged || (el.getAttribute('style') && el.getAttribute('style').includes('important'))) {
+              delete el.dataset.speedshieldPurged;
+              el.style.removeProperty('position');
+              el.style.removeProperty('top');
+              el.style.removeProperty('z-index');
+              el.style.removeProperty('display');
+              el.style.removeProperty('height');
+              el.style.removeProperty('min-height');
+              el.style.removeProperty('max-height');
+              el.style.removeProperty('padding');
+              el.style.removeProperty('padding-top');
+              el.style.removeProperty('margin');
+              el.style.removeProperty('margin-top');
+            }
           }
         } catch (e) {}
       };
