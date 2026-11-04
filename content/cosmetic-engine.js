@@ -956,56 +956,78 @@
           width: 240px;
           background: #1e1e1e;
           border: 1px solid #333333;
-          border-radius: 8px;
-          box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85);
+          border-radius: 4px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
           color: #e0e0e0;
           pointer-events: auto;
           display: none;
           flex-direction: column;
           overflow: hidden;
           z-index: 2147483647;
-          animation: hudFadeIn 0.15s ease-out;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          animation: hudFadeIn 0.12s ease-out;
         }
         @keyframes hudFadeIn {
-          from { opacity: 0; transform: translateY(6px); }
+          from { opacity: 0; transform: translateY(4px); }
           to { opacity: 1; transform: translateY(0); }
         }
         .panel-header {
-          background: #181818;
-          padding: 8px 12px;
+          background: #242424;
+          padding: 6px 10px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          border-bottom: 1px solid #2a2a2a;
+          border-bottom: 1px solid #2e2e2e;
           font-size: 11px;
           font-weight: 600;
-          color: #888;
+          color: #999;
         }
         .panel-title {
           display: flex;
           align-items: center;
           gap: 6px;
-          color: #ccc;
+          color: #bbb;
         }
         .panel-logo {
-          width: 14px;
-          height: 14px;
+          width: 13px;
+          height: 13px;
           fill: #1c68d2;
+        }
+        .panel-header-actions {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .panel-hdr-btn {
+          background: none;
+          border: none;
+          color: #888;
+          cursor: pointer;
+          padding: 2px 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 3px;
+          transition: color 0.15s, background 0.15s;
+        }
+        .panel-hdr-btn:hover {
+          color: #fff;
+          background: #333;
         }
         .panel-close {
           background: none;
           border: none;
           color: #888;
-          font-size: 14px;
+          font-size: 13px;
           cursor: pointer;
-          padding: 0 4px;
+          padding: 0 3px;
           line-height: 1;
         }
         .panel-close:hover {
           color: #fff;
         }
         .domain-box {
-          padding: 10px 12px 4px;
+          padding: 10px 10px 4px;
           text-align: center;
         }
         .domain-name {
@@ -1016,19 +1038,7 @@
         }
         .domain-name.strikethrough {
           text-decoration: line-through;
-          color: #888;
-        }
-        .domain-status {
-          font-size: 10px;
-          font-weight: 600;
-          margin-top: 2px;
-          text-transform: uppercase;
-        }
-        .domain-status.on {
-          color: #3fb950;
-        }
-        .domain-status.off {
-          color: #f85149;
+          color: #777;
         }
         .power-container {
           display: flex;
@@ -1041,68 +1051,79 @@
           height: 64px;
           border-radius: 50%;
           border: 2px solid ${isWhitelisted ? '#444' : '#1c68d2'};
-          background: ${isWhitelisted ? '#2c2c2c' : 'linear-gradient(135deg, #1c68d2, #1351a8)'};
-          box-shadow: ${isWhitelisted ? 'none' : '0 0 16px rgba(28, 104, 210, 0.45)'};
+          background: ${isWhitelisted ? '#2a2a2a' : '#1c68d2'};
+          box-shadow: ${isWhitelisted ? 'none' : '0 0 14px rgba(28, 104, 210, 0.4)'};
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: transform 0.15s ease, background 0.15s ease;
+          transition: transform 0.12s ease, background 0.15s ease;
         }
         .power-btn:hover {
-          transform: scale(1.06);
+          transform: scale(1.05);
         }
         .power-icon {
-          width: 28px;
-          height: 28px;
-          fill: ${isWhitelisted ? '#777' : '#ffffff'};
+          width: 26px;
+          height: 26px;
+          stroke: #ffffff;
+          fill: none;
+          stroke-width: 2.6;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+        .power-btn.whitelisted .power-icon {
+          stroke: #666;
         }
         .stats-table {
-          margin: 6px 12px 10px;
-          background: #252525;
-          border-radius: 6px;
-          padding: 8px 10px;
+          margin: 6px 10px 10px;
+          background: #242424;
+          border: 1px solid #2e2e2e;
+          border-radius: 4px;
+          padding: 6px 10px;
           display: flex;
           flex-direction: column;
-          gap: 5px;
+          gap: 4px;
           font-size: 11px;
         }
         .stat-row {
           display: flex;
           justify-content: space-between;
-          color: #aaa;
+          color: #999;
         }
         .stat-val {
           font-weight: 700;
-          color: #fff;
+          color: #eee;
         }
         .tools-row {
           display: flex;
-          border-top: 1px solid #2a2a2a;
+          justify-content: space-around;
+          padding: 6px 4px;
+          border-top: 1px solid #2e2e2e;
           background: #181818;
         }
         .tool-btn {
-          flex: 1;
-          padding: 8px 4px;
-          background: none;
-          border: none;
-          color: #999;
-          font-size: 10px;
-          font-weight: 600;
-          cursor: pointer;
+          width: 32px;
+          height: 30px;
+          border-radius: 4px;
           display: flex;
-          flex-direction: column;
           align-items: center;
-          gap: 3px;
-          transition: background 0.15s, color 0.15s;
+          justify-content: center;
+          background: transparent;
+          border: 1px solid transparent;
+          color: #777;
+          cursor: pointer;
+          transition: all 0.15s ease;
         }
         .tool-btn:hover {
-          background: #262626;
-          color: #fff;
+          background: #282828;
+          color: #ddd;
+          border-color: #383838;
         }
-        .tool-icon {
-          font-size: 13px;
-          line-height: 1;
+        .tool-btn.active {
+          color: #1c68d2;
+        }
+        .tool-btn.active:hover {
+          color: #3a88f7;
         }
       `;
       shadow.appendChild(style);
@@ -1127,45 +1148,74 @@
         <div class="panel-header">
           <div class="panel-title">
             <svg viewBox="0 0 24 24" class="panel-logo"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1 14.5l-3.5-3.5 1.41-1.41L11 13.67l5.59-5.59 1.41 1.41-7 7z"/></svg>
-            SpeedShield
+            <span>SpeedShield</span>
           </div>
-          <button class="panel-close" id="panelClose" title="Close">✕</button>
+          <div class="panel-header-actions">
+            <button class="panel-hdr-btn" id="hdrZapBtn" title="Enter element zapper mode (Alt+Z)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </button>
+            <button class="panel-hdr-btn" id="hdrOptionsBtn" title="Open the dashboard">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+            </button>
+            <button class="panel-close" id="panelClose" title="Close">✕</button>
+          </div>
         </div>
         <div class="domain-box">
           <div class="domain-name ${isWhitelisted ? 'strikethrough' : ''}" id="domainName">${hostname}</div>
-          <div class="domain-status ${isWhitelisted ? 'off' : 'on'}">${isWhitelisted ? 'Protection Paused' : 'Protected'}</div>
         </div>
         <div class="power-container">
           <button class="power-btn ${isWhitelisted ? 'whitelisted' : 'active'}" id="powerBtn" title="Click to toggle protection on ${hostname}">
-            <svg viewBox="0 0 24 24" class="power-icon"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42A6.92 6.92 0 0 1 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.47 1.28-4.63 3.21-5.86L6.79 4.72A8.963 8.963 0 0 0 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
+            <svg viewBox="0 0 24 24" class="power-icon">
+              <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+              <line x1="12" y1="2" x2="12" y2="12"></line>
+            </svg>
           </button>
         </div>
         <div class="stats-table">
           <div class="stat-row">
-            <span>Requests blocked:</span>
+            <span>Requests blocked</span>
             <span class="stat-val" id="statPageCount">0</span>
           </div>
           <div class="stat-row">
-            <span>Since install:</span>
-            <span class="stat-val" id="statAllTime">--</span>
+            <span>Since install</span>
+            <span class="stat-val" id="statAllTime">0</span>
+          </div>
+          <div class="stat-row">
+            <span>Custom rules</span>
+            <span class="stat-val" id="statCustomRules">0</span>
           </div>
         </div>
         <div class="tools-row">
-          <button class="tool-btn" id="toolZap" title="Zap element on page (Alt+Z)">
-            <span class="tool-icon">⚡</span>
-            <span>Zap</span>
+          <button class="tool-btn" id="toolZap" title="Enter element zapper mode (Alt+Z)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
           </button>
-          <button class="tool-btn" id="toolCookies" title="Toggle Cookie Shield">
-            <span class="tool-icon">🍪</span>
-            <span>Cookies</span>
+          <button class="tool-btn active" id="toolCookies" title="Cosmetic Filtering & Cookie Defuser (Click to toggle)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"></path>
+              <path d="M8.5 8.5v.01"></path>
+              <path d="M7 14v.01"></path>
+              <path d="M15 15v.01"></path>
+              <path d="M11 17v.01"></path>
+            </svg>
           </button>
-          <button class="tool-btn" id="toolCleaner" title="Toggle URL Cleaner">
-            <span class="tool-icon">🔗</span>
-            <span>Clean URLs</span>
+          <button class="tool-btn active" id="toolCleaner" title="URL Tracking Cleaner (Click to toggle)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
           </button>
-          <button class="tool-btn" id="toolOptions" title="Open Settings Dashboard">
-            <span class="tool-icon">⚙️</span>
-            <span>Settings</span>
+          <button class="tool-btn" id="toolOptions" title="Open the dashboard">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
           </button>
         </div>
       `;
@@ -1283,6 +1333,18 @@
             if (statAllTime && data.totalBlocked !== undefined) {
               statAllTime.textContent = (data.totalBlocked).toLocaleString();
             }
+            const statCustomRules = shadow.getElementById('statCustomRules');
+            if (statCustomRules && data.customFiltersCount !== undefined) {
+              statCustomRules.textContent = String(data.customFiltersCount);
+            }
+            const toolCookies = shadow.getElementById('toolCookies');
+            if (toolCookies) {
+              toolCookies.classList.toggle('active', data.cookieShieldEnabled !== false);
+            }
+            const toolCleaner = shadow.getElementById('toolCleaner');
+            if (toolCleaner) {
+              toolCleaner.classList.toggle('active', data.urlCleanerEnabled !== false);
+            }
           });
         } catch (e) {}
       }
@@ -1296,46 +1358,82 @@
       updateHUDCount = updateCount;
 
       // Event Listeners for panel
-      shadow.getElementById('panelClose').addEventListener('click', (e) => {
-        e.stopPropagation();
-        panel.style.display = 'none';
-      });
-
-      shadow.getElementById('powerBtn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (!chrome.runtime || !chrome.runtime.id) return;
-        chrome.runtime.sendMessage({ action: 'toggle_whitelist', domain: hostname }, () => {
-          window.location.reload();
+      const panelClose = shadow.getElementById('panelClose');
+      if (panelClose) {
+        panelClose.addEventListener('click', (e) => {
+          e.stopPropagation();
+          panel.style.display = 'none';
         });
+      }
+
+      const powerBtn = shadow.getElementById('powerBtn');
+      if (powerBtn) {
+        powerBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!chrome.runtime || !chrome.runtime.id) return;
+          chrome.runtime.sendMessage({ action: 'toggle_whitelist', domain: hostname }, () => {
+            window.location.reload();
+          });
+        });
+      }
+
+      function openOptions() {
+        panel.style.display = 'none';
+        chrome.runtime.sendMessage({ action: 'open_dashboard' });
+      }
+
+      const hdrOptionsBtn = shadow.getElementById('hdrOptionsBtn');
+      if (hdrOptionsBtn) hdrOptionsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openOptions();
       });
 
-      shadow.getElementById('toolZap').addEventListener('click', (e) => {
+      const toolOptions = shadow.getElementById('toolOptions');
+      if (toolOptions) toolOptions.addEventListener('click', (e) => {
         e.stopPropagation();
+        openOptions();
+      });
+
+      function startZapper() {
         panel.style.display = 'none';
         activateZapper();
+      }
+
+      const hdrZapBtn = shadow.getElementById('hdrZapBtn');
+      if (hdrZapBtn) hdrZapBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        startZapper();
       });
 
-      shadow.getElementById('toolCookies').addEventListener('click', (e) => {
+      const toolZap = shadow.getElementById('toolZap');
+      if (toolZap) toolZap.addEventListener('click', (e) => {
         e.stopPropagation();
-        chrome.runtime.sendMessage({ action: 'toggle_cookie_shield' }, (res) => {
-          showToast(res && res.cookieShieldEnabled ? '🍪 Cookie Shield Enabled' : '🍪 Cookie Shield Disabled');
+        startZapper();
+      });
+
+      const toolCookies = shadow.getElementById('toolCookies');
+      if (toolCookies) {
+        toolCookies.addEventListener('click', (e) => {
+          e.stopPropagation();
+          chrome.runtime.sendMessage({ action: 'toggle_cookie_shield' }, (res) => {
+            const active = res && res.cookieShieldEnabled !== false;
+            toolCookies.classList.toggle('active', active);
+            showToast(active ? 'Cookie defuser enabled' : 'Cookie defuser disabled');
+          });
         });
-      });
+      }
 
-      shadow.getElementById('toolCleaner').addEventListener('click', (e) => {
-        e.stopPropagation();
-        chrome.runtime.sendMessage({ action: 'toggle_url_cleaner' }, (res) => {
-          showToast(res && res.urlCleanerEnabled ? '🔗 URL Cleaner Enabled' : '🔗 URL Cleaner Disabled');
+      const toolCleaner = shadow.getElementById('toolCleaner');
+      if (toolCleaner) {
+        toolCleaner.addEventListener('click', (e) => {
+          e.stopPropagation();
+          chrome.runtime.sendMessage({ action: 'toggle_url_cleaner' }, (res) => {
+            const active = res && res.urlCleanerEnabled !== false;
+            toolCleaner.classList.toggle('active', active);
+            showToast(active ? 'URL cleaner enabled' : 'URL cleaner disabled');
+          });
         });
-      });
-
-      shadow.getElementById('toolOptions').addEventListener('click', (e) => {
-        e.stopPropagation();
-        panel.style.display = 'none';
-        if (chrome.runtime.openOptionsPage) {
-          chrome.runtime.openOptionsPage();
-        }
-      });
+      }
 
       // Global window click to dismiss panel when clicking outside
       window.addEventListener('mousedown', (e) => {

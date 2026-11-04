@@ -648,4 +648,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true;
   }
+
+  if (message.action === 'open_dashboard' || message.action === 'speedshield_open_dashboard') {
+    if (chrome.runtime.openOptionsPage) {
+      chrome.runtime.openOptionsPage();
+    } else {
+      chrome.tabs.create({ url: chrome.runtime.getURL('options/options.html') });
+    }
+    sendResponse({ success: true });
+    return true;
+  }
 });
