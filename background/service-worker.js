@@ -103,9 +103,7 @@ const MODERN_COSMETIC_SELECTORS = [
   '[class*="plus-offer"]',
   '[class*="promo-banner"]',
   '[class*="banner-ad"]',
-  'div[data-testid*="ad-banner"]',
-  'a[href*="c.ai/plus"]',
-  'a[href*="character.ai/plus"]'
+  'div[data-testid*="ad-banner"]'
 ];
 
 // Per-tab blocked request tracker

@@ -531,19 +531,9 @@ html[class*="sp-message-open"] {
   overflow: auto !important;
 }
 
-/* ==========================================================================
-   Character.AI & AI Tools: Clean Banner Ad & Promo Removal
-   ========================================================================== */
-a[href*="character.ai/plus"],
-a[href*="c.ai/plus"],
+/* Character.AI Plus Promo Hiding */
 [class*="cai-plus"] {
   display: none !important;
-  height: 0 !important;
-  min-height: 0 !important;
-  max-height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  pointer-events: none !important;
 }
 
 /* ==========================================================================

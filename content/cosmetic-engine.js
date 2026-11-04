@@ -84,38 +84,11 @@
     }
 
 
-    // Character.AI Zero-Breakage Layout Guard:
-    // Character.AI runs a complex React virtualized chat stream with streaming tokens.
-    // Clean up any lingering sticky/display overrides from previous extension runs, and never
-    // perform DOM-mutating sweeps so the native flex chat header and messages never flicker.
+    // Character.AI Zero-Interference Pure Passthrough:
+    // Character.AI is a pure AI conversation platform with zero third-party banner ads.
+    // Immediately return so no DOM filters, mutation observers, or style mutators touch its React virtualizer.
     if (isCharacterAI) {
-      const cleanCharacterAI = () => {
-        try {
-          const styled = document.querySelectorAll('[data-speedshield-purged], [style*="position: sticky"], [style*="display: none"], [style*="height: 0"]');
-          for (let i = 0; i < styled.length; i++) {
-            const el = styled[i];
-            if (el.dataset.speedshieldPurged || (el.getAttribute('style') && el.getAttribute('style').includes('important'))) {
-              delete el.dataset.speedshieldPurged;
-              el.style.removeProperty('position');
-              el.style.removeProperty('top');
-              el.style.removeProperty('z-index');
-              el.style.removeProperty('display');
-              el.style.removeProperty('height');
-              el.style.removeProperty('min-height');
-              el.style.removeProperty('max-height');
-              el.style.removeProperty('padding');
-              el.style.removeProperty('padding-top');
-              el.style.removeProperty('margin');
-              el.style.removeProperty('margin-top');
-            }
-          }
-        } catch (e) {}
-      };
-      cleanCharacterAI();
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', cleanCharacterAI, { once: true });
-        window.addEventListener('load', cleanCharacterAI, { once: true });
-      }
+      return;
     }
 
     // Inject dynamic CSS rules for newly auto-updated ad selectors
@@ -198,14 +171,7 @@
       'iframe[src*="adnxs.com"]',
       '.fc-ab-root',
       '.adblock-overlay',
-      '#adblock-notice',
-      '[class*="cai-plus"]',
-      '[class*="plus-offer"]',
-      '[class*="promo-banner"]',
-      '[class*="banner-ad"]',
-      'div[data-testid*="ad-banner"]',
-      'a[href*="c.ai/plus"]',
-      'a[href*="character.ai/plus"]'
+      '#adblock-notice'
     ];
 
     const ALL_SELECTORS = Array.from(new Set([...BASE_SELECTORS, ...dynamicSelectors]));
@@ -344,31 +310,6 @@
             w.style.setProperty('margin', '0px', 'important');
             newlyBlocked++;
           }
-        }
-      }
-
-      // 5. Character.AI Specific Promo Banner Purge (Non-destructive, zero chat/header interference)
-      if (isCharacterAI) {
-        // Target only standalone C.AI+ promotional upgrade banners, never chat containers
-        const caiBanners = root.querySelectorAll(
-          '[class*="cai-plus"], [class*="plus-offer"], [class*="promo-banner"], ' +
-          'div[data-testid*="ad-banner"], a[href*="character.ai/plus"], a[href*="c.ai/plus"]'
-        );
-        for (let i = 0; i < caiBanners.length; i++) {
-          const b = caiBanners[i];
-          if (b.dataset.speedshieldPurged) continue;
-          // Never touch chat messages, headers, avatars, menus, or input containers
-          if (b.closest('[data-testid*="chat-message"], [class*="message"], [class*="bubble"], header, nav, form, [role="navigation"]')) continue;
-          if (b.querySelector('input, textarea, form, button, img')) continue;
-
-          b.dataset.speedshieldPurged = 'true';
-          b.style.setProperty('display', 'none', 'important');
-          b.style.setProperty('height', '0px', 'important');
-          b.style.setProperty('min-height', '0px', 'important');
-          b.style.setProperty('max-height', '0px', 'important');
-          b.style.setProperty('padding', '0px', 'important');
-          b.style.setProperty('margin', '0px', 'important');
-          newlyBlocked++;
         }
       }
 
