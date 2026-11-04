@@ -82,6 +82,30 @@
     const isTwitch = hostname.includes('twitch.tv');
     const isCharacterAI = hostname.includes('character.ai') || hostname.endsWith('c.ai');
 
+    // Character.AI Zero-Breakage Layout Guard:
+    // Character.AI runs a complex React virtualized chat stream with streaming tokens.
+    // Clean up any lingering sticky/display overrides from previous extension runs, and never
+    // perform DOM-mutating sweeps so the native flex chat header and messages never flicker.
+    if (isCharacterAI) {
+      const cleanCharacterAI = () => {
+        try {
+          const styled = document.querySelectorAll('[style*="sticky"], [data-speedshield-purged]');
+          for (let i = 0; i < styled.length; i++) {
+            const el = styled[i];
+            delete el.dataset.speedshieldPurged;
+            el.style.removeProperty('position');
+            el.style.removeProperty('top');
+            el.style.removeProperty('z-index');
+          }
+        } catch (e) {}
+      };
+      cleanCharacterAI();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', cleanCharacterAI, { once: true });
+        window.addEventListener('load', cleanCharacterAI, { once: true });
+      }
+    }
+
     // Inject dynamic CSS rules for newly auto-updated ad selectors
     if (dynamicSelectors.length > 0) {
       try {
@@ -199,6 +223,7 @@
 
     function purgeAdElements(root = document) {
       if (!root || !root.querySelectorAll) return;
+      if (isCharacterAI) return; // Pure passthrough for Character.AI: prevents React virtualized layout desync and header flickering
 
       let newlyBlocked = 0;
 
@@ -422,6 +447,7 @@
     const PURGE_THROTTLE_MS = 120; // 120ms debounce during heavy DOM mutation bursts to preserve CPU for page rendering
 
     function scheduleBatchedPurge() {
+      if (isCharacterAI) return;
       if (purgeScheduled) return;
       purgeScheduled = true;
       const now = performance.now();
@@ -438,6 +464,7 @@
 
     // Dynamic MutationObserver with batched frame updates for silky smooth scrolling
     const observer = new MutationObserver((mutations) => {
+      if (isCharacterAI) return;
       for (let i = 0; i < mutations.length; i++) {
         if (mutations[i].addedNodes.length > 0) {
           scheduleBatchedPurge();
