@@ -80,6 +80,14 @@
     "contextMenus"
   ],
   "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+S",
+        "windows": "Alt+Shift+S",
+        "mac": "Alt+Shift+S"
+      },
+      "description": "Open SpeedShield Dashboard Popup"
+    },
     "toggle_zapper": {
       "suggested_key": {
         "default": "Alt+Z"

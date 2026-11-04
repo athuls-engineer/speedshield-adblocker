@@ -152,6 +152,11 @@ function setupContextMenus() {
         title: '🛡️ SpeedShield: Toggle whitelist for this site',
         contexts: ['all']
       });
+      chrome.contextMenus.create({
+        id: 'speedshield_open_dashboard',
+        title: '⚙️ SpeedShield: Open dashboard / settings',
+        contexts: ['all']
+      });
     });
   } catch (e) {}
 }
@@ -165,6 +170,10 @@ if (chrome.contextMenus && chrome.contextMenus.onClicked) {
         const url = new URL(tab.url);
         toggleDomainWhitelist(url.hostname.toLowerCase(), tab.id);
       } catch (e) {}
+    } else if (info.menuItemId === 'speedshield_open_dashboard') {
+      if (chrome.runtime.openOptionsPage) {
+        chrome.runtime.openOptionsPage();
+      }
     }
   });
 }
