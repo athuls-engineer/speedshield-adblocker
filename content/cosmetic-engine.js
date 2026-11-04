@@ -15,7 +15,8 @@
       'whitelist',
       'dynamic_cosmetic_selectors',
       'custom_cosmetic_filters',
-      'hud_enabled'
+      'hud_enabled',
+      'hud_mode'
     ], (data) => {
       if (chrome.runtime.lastError || !data) return;
 
@@ -23,19 +24,19 @@
       const whitelist = data.whitelist || [];
       const isWhitelisted = whitelist.some(domain => hostname === domain || hostname.endsWith('.' + domain));
       const shieldEnabled = data.shield_enabled !== false;
-      const hudEnabled = data.hud_enabled !== false;
+      const hudMode = data.hud_mode || (data.hud_enabled === false ? 'never' : 'auto');
 
       initCosmeticEngine(
         data.dynamic_cosmetic_selectors || [],
         data.custom_cosmetic_filters || [],
         isWhitelisted,
         shieldEnabled,
-        hudEnabled
+        hudMode
       );
     });
   } catch (e) {}
 
-  function initCosmeticEngine(dynamicSelectors = [], initialCustomFilters = [], isWhitelisted = false, shieldEnabled = true, hudEnabled = true) {
+  function initCosmeticEngine(dynamicSelectors = [], initialCustomFilters = [], isWhitelisted = false, shieldEnabled = true, hudMode = 'auto') {
     let blockedCount = 0;
     let updateHUDCount = () => {};
     let toggleHUDPanel = () => {};
@@ -64,9 +65,9 @@
     }
 
     // Initialize In-Page Floating HUD on top-level pages
-    if (window === window.top && hudEnabled !== false) {
+    if (window === window.top && hudMode !== 'never') {
       try {
-        initInPageHUD(isWhitelisted, shieldEnabled, hostname);
+        initInPageHUD(isWhitelisted, shieldEnabled, hostname, hudMode);
       } catch (err) {
         console.warn('[SpeedShield] In-page HUD notice:', err);
       }
@@ -882,7 +883,7 @@
     // In-Page Floating Shield Widget (Split-Screen & Vertical Tabs HUD)
     // Allows full uBlock Origin control even when browser toolbar collapses
     // ========================================================================
-    function initInPageHUD(isWhitelisted, shieldEnabled, hostname) {
+    function initInPageHUD(isWhitelisted, shieldEnabled, hostname, hudMode = 'auto') {
       if (document.getElementById('speedshield-hud-host')) return;
 
       const host = document.createElement('div');
@@ -1353,6 +1354,36 @@
           togglePanel();
         }
       }, { capture: true });
+
+      // Automatic Split-Screen / Narrow Viewport Detection
+      function isSplitScreenOrNarrow() {
+        const isNarrow = window.innerWidth <= 1050;
+        const isSnapped = screen.availWidth > 0 && window.innerWidth <= (screen.availWidth * 0.72);
+        return isNarrow || isSnapped;
+      }
+
+      function updatePillVisibility() {
+        if (hudMode === 'never') {
+          pill.style.display = 'none';
+          return;
+        }
+        if (hudMode === 'always') {
+          pill.style.display = 'flex';
+          return;
+        }
+        // Mode 'auto' (Default): only show in split-screen or narrow windows where top bar collapsed
+        if (isSplitScreenOrNarrow()) {
+          pill.style.display = 'flex';
+        } else {
+          pill.style.display = 'none';
+          if (panel.style.display === 'flex') {
+            panel.style.display = 'none';
+          }
+        }
+      }
+
+      window.addEventListener('resize', updatePillVisibility, { passive: true });
+      updatePillVisibility();
 
       // Fetch initial count
       refreshStats();

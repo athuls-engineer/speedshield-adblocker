@@ -62,13 +62,14 @@
         </div>
         <div class="module-row" style="margin-top: 12px;">
           <div class="module-info">
-            <span class="module-title">📌 In-Page Floating Shield Widget (Split-Screen & Vertical Tabs HUD)</span>
-            <span class="module-desc">Displays a sleek, draggable floating shield badge on web pages when browser toolbar extensions are hidden in vertical tabs or narrow split-screen. Click to open uBlock controls or press Alt+Shift+S.</span>
+            <span class="module-title">📌 In-Page Floating Shield Widget</span>
+            <span class="module-desc">Controls when the floating shield pill appears on web pages. By default, it automatically shows only in split-screen or narrow windows when toolbar extensions collapse.</span>
           </div>
-          <label class="switch">
-            <input type="checkbox" id="hudToggle" checked>
-            <span class="slider round"></span>
-          </label>
+          <select id="hudModeSelect" style="background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 10px; font-size: 12px; cursor: pointer;">
+            <option value="auto" selected>Auto (Only in split-screen / narrow windows)</option>
+            <option value="always">Always show</option>
+            <option value="never">Never show</option>
+          </select>
         </div>
       </section>
 

@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const cookieShieldToggle = document.getElementById('cookieShieldToggle');
   const urlCleanerToggle = document.getElementById('urlCleanerToggle');
-  const hudToggle = document.getElementById('hudToggle');
+  const hudModeSelect = document.getElementById('hudModeSelect');
 
   const customFilterInput = document.getElementById('customFilterInput');
   const addCustomFilterBtn = document.getElementById('addCustomFilterBtn');
@@ -39,7 +39,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     'total_blocked',
     'cookie_shield_enabled',
     'url_cleaner_enabled',
-    'hud_enabled'
+    'hud_enabled',
+    'hud_mode'
   ]);
 
   if (cookieShieldToggle) {
@@ -58,10 +59,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  if (hudToggle) {
-    hudToggle.checked = data.hud_enabled !== false;
-    hudToggle.addEventListener('change', async () => {
-      await chrome.storage.local.set({ hud_enabled: hudToggle.checked });
+  if (hudModeSelect) {
+    hudModeSelect.value = data.hud_mode || (data.hud_enabled === false ? 'never' : 'auto');
+    hudModeSelect.addEventListener('change', async () => {
+      await chrome.storage.local.set({
+        hud_mode: hudModeSelect.value,
+        hud_enabled: hudModeSelect.value !== 'never'
+      });
     });
   }
 
