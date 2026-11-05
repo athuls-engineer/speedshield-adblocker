@@ -57,20 +57,6 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "*://*.character.ai/*",
-        "*://character.ai/*",
-        "*://*.c.ai/*",
-        "*://c.ai/*"
-      ],
-      "css": [
-        "content/cosmetic-filter.css",
-        "content/cai-fix.css"
-      ],
-      "run_at": "document_start",
-      "all_frames": true
-    },
-    {
       "matches": ["<all_urls>"],
       "exclude_matches": [
         "*://*.character.ai/*",

@@ -531,10 +531,7 @@ html[class*="sp-message-open"] {
   overflow: auto !important;
 }
 
-/* Character.AI Plus Promo Hiding */
-[class*="cai-plus"] {
-  display: none !important;
-}
+
 
 /* ==========================================================================
    Universal Google Ad Slot Container Collapser (Eliminates Blank Gap Rectangles)
@@ -554,55 +551,7 @@ div:has(> iframe[id^="aswift_"]:only-child) {
 }
 
 
-/* ==========================================================================
-   Character.AI Responsive Split-Screen Layout & Banner Gap Eliminator
-   ========================================================================== */
-[class*="cai-plus"],
-[class*="plus-offer"],
-[class*="promo-banner"],
-[class*="app-banner"],
-[class*="mobile-banner"],
-[id*="app-banner"],
-[id*="promo-banner"],
-a[href*="c.ai/plus"],
-a[href*="character.ai/plus"],
-a[href*="/plus"],
-a[href*="app.link"],
-a[href*="apps.apple.com"],
-a[href*="play.google.com"],
-div:has(> a[href*="/plus"]),
-div:has(> a[href*="c.ai/plus"]),
-div:has(> a[href*="character.ai/plus"]),
-div:has(> a[href*="app.link"]),
-div:has(> a[href*="apps.apple.com"]),
-div:has(> a[href*="play.google.com"]),
-div:has(> [class*="cai-plus"]),
-div:has(> [class*="plus-offer"]),
-div:has(> [class*="promo-banner"]),
-div:has(> [class*="app-banner"]),
-div:has(> [class*="mobile-banner"]) {
+/* Optional generic promo hiding */
+[class*="cai-plus"] {
   display: none !important;
-  height: 0px !important;
-  min-height: 0px !important;
-  max-height: 0px !important;
-  padding: 0px !important;
-  margin: 0px !important;
-  border: none !important;
-  overflow: hidden !important;
-}
-
-div.flex.gap-3.w-full.justify-between.fixed,
-div[class*="fixed"][class*="top-0"][class*="z-30"],
-div[class*="justify-between"][class*="fixed"],
-header[class*="fixed"] {
-  top: 0px !important;
-  margin-top: 0px !important;
-  position: fixed !important;
-  z-index: 100 !important;
-}
-
-main#main-content > div.h-full.w-full.flex.flex-row.justify-center {
-  top: 0px !important;
-  margin-top: 0px !important;
-  padding-top: 0px !important;
 }
