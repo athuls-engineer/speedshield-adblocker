@@ -1,0 +1,31 @@
+/* ==========================================================================
+   SpeedShield - Character.AI Responsive Clean Docking
+   Eliminates split-screen empty top padding and dead gap without flickering.
+   Zero JavaScript. Zero layout mutations. Pure GPU-accelerated CSS.
+   ========================================================================== */
+
+/* 1. Collapse C.AI+ promo banner nodes if present */
+[class*="cai-plus"],
+[class*="plus-offer"],
+a[href*="/plus"],
+a[href*="c.ai/plus"],
+a[href*="character.ai/plus"] {
+  display: none !important;
+  height: 0px !important;
+  margin: 0px !important;
+  padding: 0px !important;
+}
+
+/* 2. Collapse split-screen / narrow-view dead pt-20 (80px) chat container padding */
+@media (max-width: 1100px) {
+  div.flex.flex-col.gap-6.w-full.justify-between.max-w-3xl.items-center.overflow-x-hidden,
+  div[class*="overflow-x-hidden"][class*="max-w-3xl"] {
+    padding-top: 6px !important;
+  }
+
+  div.flex.flex-col.items-center.justify-center.text-center.gap-1.pb-6,
+  div[class*="justify-center"][class*="text-center"][class*="pb-6"] {
+    padding-top: 0px !important;
+    padding-bottom: 8px !important;
+  }
+}

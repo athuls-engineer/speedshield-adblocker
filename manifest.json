@@ -81,6 +81,17 @@
       "run_at": "document_start",
       "world": "MAIN",
       "all_frames": true
+    },
+    {
+      "matches": [
+        "*://*.character.ai/*",
+        "*://character.ai/*",
+        "*://*.c.ai/*",
+        "*://c.ai/*"
+      ],
+      "css": ["content/cai-clean.css"],
+      "run_at": "document_start",
+      "all_frames": false
     }
   ],
   "permissions": [
