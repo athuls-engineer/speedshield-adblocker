@@ -16,16 +16,42 @@ a[href*="character.ai/plus"] {
   padding: 0px !important;
 }
 
-/* 2. Collapse split-screen / narrow-view dead pt-20 (80px) chat container padding */
+/* 2. Collapse split-screen / narrow-view dead pt-20, pt-8, pt-6 paddings and empty navbar */
 @media (max-width: 1100px) {
-  div.flex.flex-col.gap-6.w-full.justify-between.max-w-3xl.items-center.overflow-x-hidden,
-  div[class*="overflow-x-hidden"][class*="max-w-3xl"] {
-    padding-top: 6px !important;
+  /* Collapse chat column top padding (80px -> 0px) */
+  div[class*="pt-20"],
+  .pt-20,
+  div[class*="max-w-3xl"][class*="overflow-x-hidden"] {
+    padding-top: 0px !important;
   }
 
-  div.flex.flex-col.items-center.justify-center.text-center.gap-1.pb-6,
+  /* Collapse greeting top padding (32px -> 0px) */
+  div[class*="pt-8"],
+  .pt-8,
   div[class*="justify-center"][class*="text-center"][class*="pb-6"] {
     padding-top: 0px !important;
-    padding-bottom: 8px !important;
+    padding-bottom: 4px !important;
+  }
+
+  /* Collapse outer layout wrapper padding */
+  div[class*="pt-6"][class*="max-w-7xl"],
+  div.pt-6 {
+    padding-top: 0px !important;
+  }
+
+  /* Prevent empty fixed top navbar from occupying vertical dead space */
+  div.flex.gap-3.w-full.justify-between.fixed.top-0,
+  div[class*="fixed"][class*="top-0"][class*="z-30"] {
+    pointer-events: none !important;
+    background: transparent !important;
+    height: 0px !important;
+    min-height: 0px !important;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+  }
+
+  div.flex.gap-3.w-full.justify-between.fixed.top-0 > *,
+  div[class*="fixed"][class*="top-0"][class*="z-30"] > * {
+    pointer-events: auto !important;
   }
 }
