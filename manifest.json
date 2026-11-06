@@ -58,13 +58,18 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
+      "css": ["content/cosmetic-filter.css"],
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "matches": ["<all_urls>"],
       "exclude_matches": [
         "*://*.character.ai/*",
         "*://character.ai/*",
         "*://*.c.ai/*",
         "*://c.ai/*"
       ],
-      "css": ["content/cosmetic-filter.css"],
       "js": ["content/cosmetic-engine.js"],
       "run_at": "document_start",
       "all_frames": true
@@ -89,9 +94,13 @@
         "*://*.c.ai/*",
         "*://c.ai/*"
       ],
-      "css": ["content/cai-clean.css"],
+      "css": [
+        "content/cosmetic-filter.css",
+        "content/cai-clean.css",
+        "content/cai-fix.css"
+      ],
       "run_at": "document_start",
-      "all_frames": false
+      "all_frames": true
     }
   ],
   "permissions": [
