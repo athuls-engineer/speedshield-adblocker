@@ -749,11 +749,12 @@
           pointer-events: auto;
           transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
           z-index: 2147483646;
+          color: #ffffff;
         }
         .hud-pill:hover {
           transform: scale(1.04);
-          border-color: #1c68d2;
-          box-shadow: 0 6px 20px rgba(28, 104, 210, 0.4);
+          border-color: #38bdf8;
+          box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
         }
         .hud-pill:active {
           cursor: grabbing;
@@ -761,10 +762,17 @@
         .shield-icon {
           width: 16px;
           height: 16px;
-          fill: ${isWhitelisted ? '#888' : '#1c68d2'};
+          color: ${isWhitelisted ? '#94a3b8' : '#38bdf8'};
+          fill: ${isWhitelisted ? '#94a3b8' : '#38bdf8'};
           flex-shrink: 0;
           display: flex;
           align-items: center;
+        }
+        .shield-icon svg {
+          width: 16px;
+          height: 16px;
+          color: inherit;
+          fill: currentColor;
         }
         .badge-count {
           font-size: 12px;
@@ -821,7 +829,8 @@
         .panel-logo {
           width: 13px;
           height: 13px;
-          fill: #1c68d2;
+          color: ${isWhitelisted ? '#94a3b8' : '#38bdf8'};
+          fill: ${isWhitelisted ? '#94a3b8' : '#38bdf8'};
         }
         .panel-header-actions {
           display: flex;
