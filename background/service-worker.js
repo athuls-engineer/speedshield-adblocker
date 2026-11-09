@@ -19,15 +19,38 @@ const PROTECTED_INFRA_DOMAINS = [
   'paypal.com', 'stripe.com', 'auth0.com', 'okta.com', 'klarna.com', 'razorpay.com',
   'facebook.com', 'instagram.com', 'whatsapp.com', 'telegram.org', 'discord.com',
   'reddit.com', 'wikipedia.org', 'character.ai', 'c.ai', 'chatgpt.com', 'openai.com', 'claude.ai',
-  'twitter.com', 'x.com', 'linkedin.com'
+  'twitter.com', 'x.com', 'linkedin.com',
+  'brightspace.com', 'desire2learn.com', 'd2l.com', 'onlinemanipal.com', 'zoom.us', 'slack.com',
+  'notion.so', 'figma.com', 'canva.com', 'salesforce.com', 'dropbox.com'
 ];
 
-// Curated live threat, malware, virus, tracker, and ad feeds for autonomous updates
+const MULTI_TENANT_SUFFIXES = [
+  'cloudfront.net', 'elasticbeanstalk.com', 'azureedge.net', 'trafficmanager.net',
+  'windows.net', 'edgekey.net', 'edgesuite.net', 'akadns.net', 'akamaized.net',
+  'pages.dev', 'workers.dev', 'github.io', 'gitlab.io', 'appspot.com',
+  'herokuapp.com', 'firebaseapp.com', 'web.app', 'onrender.com', 'up.railway.app',
+  'vercel.app', 'netlify.app', 'supabase.co', 'brightspace.com', 'desire2learn.com',
+  'd2l.com', 'onlinemanipal.com'
+];
+
+function isDomainProtected(domain) {
+  if (!domain) return false;
+  domain = domain.toLowerCase();
+  if (PROTECTED_INFRA_DOMAINS.some(p => domain === p || domain.endsWith('.' + p))) return true;
+  if (MULTI_TENANT_SUFFIXES.some(s => domain === s || domain.endsWith('.' + s))) return true;
+  if (
+    domain.endsWith('.edu') || domain.endsWith('.edu.in') || domain.endsWith('.ac.in') ||
+    domain.endsWith('.gov') || domain.endsWith('.gov.in') || domain.endsWith('.org.in')
+  ) {
+    return true;
+  }
+  return false;
+}
+
+// Curated live threat, malware, tracker, and ad feeds for autonomous updates
 const REMOTE_RULE_SOURCES = [
-  'https://urlhaus.abuse.ch/downloads/hostfile/',
-  'https://pgl.yoyo.org/adservers/serverlist.php?hostformat=nohtml&showintro=0&mimetype=plaintext',
   'https://adaway.org/hosts.txt',
-  'https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts'
+  'https://pgl.yoyo.org/adservers/serverlist.php?hostformat=nohtml&showintro=0&mimetype=plaintext'
 ];
 
 // Curated modern cosmetic selectors for new banner formats and ad types
@@ -116,25 +139,17 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   console.log('[SpeedShield] Installed/Updated:', details.reason);
   await initializeStorage();
   await setupAlarm();
+  await cleanExistingDynamicRules();
   await syncWhitelistRules();
   setupContextMenus();
-  // Autonomous initial background update
-  checkAndPerformUpdate(false).catch(() => {});
 });
 
 chrome.runtime.onStartup.addListener(async () => {
   console.log('[SpeedShield] Browser started. Ensuring auto-updater is active...');
   await setupAlarm();
+  await cleanExistingDynamicRules();
   await syncWhitelistRules();
   setupContextMenus();
-
-  // If last update was > 4 hours ago, auto-update immediately in background
-  const data = await chrome.storage.local.get(['last_updated', 'update_interval_minutes']);
-  const intervalMs = (data.update_interval_minutes || DEFAULT_UPDATE_INTERVAL_MINUTES) * 60 * 1000;
-  if (!data.last_updated || (Date.now() - data.last_updated) > intervalMs) {
-    console.log('[SpeedShield] Running scheduled auto-update on startup...');
-    checkAndPerformUpdate(false).catch(() => {});
-  }
 });
 
 // Context Menus & Keyboard Shortcut Handler
@@ -198,12 +213,10 @@ async function toggleDomainWhitelist(domain, tabId) {
   if (!domain) return;
   const { whitelist = [] } = await chrome.storage.local.get(['whitelist']);
   const index = whitelist.indexOf(domain);
-  let isWhitelisted = false;
   if (index >= 0) {
     whitelist.splice(index, 1);
   } else {
     whitelist.push(domain);
-    isWhitelisted = true;
   }
   await chrome.storage.local.set({ whitelist });
   await syncWhitelistRules();
@@ -212,7 +225,7 @@ async function toggleDomainWhitelist(domain, tabId) {
   }
 }
 
-// Periodic Alarm Listener for Autonomous Updates
+// Periodic Alarm Listener for Autonomous Updates (Runs purely off-peak in background)
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'speedshield_rule_update') {
     console.log('[SpeedShield] Autonomous 4-hour background update alarm triggered.');
@@ -275,7 +288,7 @@ function updateBadge(tabId, count) {
   const countStr = count > 0 ? (count > 999 ? '999+' : String(count)) : '';
   try {
     chrome.action.setBadgeText({ tabId, text: countStr }, () => {
-      if (chrome.runtime.lastError) {} // Ignore if tab closed
+      if (chrome.runtime.lastError) {}
     });
     chrome.action.setBadgeBackgroundColor({ tabId, color: '#00b4d8' }, () => {
       if (chrome.runtime.lastError) {}
@@ -316,24 +329,43 @@ function incrementTabCount(tabId, amount = 1) {
   }
 }
 
-// Clean up tab stats when closed or navigated
+// Clean up tab stats when closed
 chrome.tabs.onRemoved.addListener((tabId) => {
   tabBlockedCounts.delete(tabId);
 });
 
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
+// Synchronous, zero-delay tab navigation handler - NEVER blocks or stalls page loading!
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
   if (changeInfo.status === 'loading' || changeInfo.url) {
     tabBlockedCounts.set(tabId, 0);
     updateBadge(tabId, 0);
-
-    // Liveness check: If more than update interval elapsed, trigger auto-update silently
-    const data = await chrome.storage.local.get(['last_updated', 'update_interval_minutes']);
-    const intervalMs = (data.update_interval_minutes || DEFAULT_UPDATE_INTERVAL_MINUTES) * 60 * 1000;
-    if (data.last_updated && (Date.now() - data.last_updated) > intervalMs) {
-      checkAndPerformUpdate(false).catch(() => {});
-    }
   }
 });
+
+// Prunes any dynamic rules matching vital CDNs or protected infrastructure
+async function cleanExistingDynamicRules() {
+  try {
+    const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
+    const badRuleIds = [];
+    for (const rule of existingRules) {
+      const filter = (rule.condition && rule.condition.urlFilter) || '';
+      const domain = filter.replace(/^\|\|/, '').replace(/\^$/, '').toLowerCase();
+      if (isDomainProtected(domain)) {
+        badRuleIds.push(rule.id);
+      }
+    }
+    if (badRuleIds.length > 0) {
+      console.log(`[SpeedShield] Purging ${badRuleIds.length} false-positive dynamic rules.`);
+      await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: badRuleIds
+      });
+      const remaining = await chrome.declarativeNetRequest.getDynamicRules();
+      await chrome.storage.local.set({ dynamic_rules_count: remaining.length });
+    }
+  } catch (e) {
+    console.warn('[SpeedShield] Error cleaning dynamic rules:', e.message);
+  }
+}
 
 // Synchronize Whitelist rules and master shield state
 async function syncWhitelistRules() {
@@ -431,115 +463,122 @@ async function syncWhitelistRules() {
   }
 }
 
-// Autonomous Filter Update Engine
+// Autonomous Filter Update Engine (Guarded from running concurrently)
+let isUpdating = false;
+
 async function checkAndPerformUpdate(forced = false) {
-  console.log('[SpeedShield] Auto-updating ad, tracker, malware, and virus filter definitions...');
-  let fetchedDomains = new Set();
+  if (isUpdating) {
+    return { success: false, reason: 'Update already in progress' };
+  }
+  isUpdating = true;
 
-  for (const url of REMOTE_RULE_SOURCES) {
-    if (fetchedDomains.size >= MAX_DYNAMIC_RULES) break;
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout per feed
-      const response = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeoutId);
+  try {
+    console.log('[SpeedShield] Auto-updating ad, tracker, and malware filter definitions in background...');
+    let fetchedDomains = new Set();
 
-      if (response.ok) {
-        const text = await response.text();
-        const lines = text.split('\n');
-        let fromThisFeed = 0;
+    for (const url of REMOTE_RULE_SOURCES) {
+      if (fetchedDomains.size >= MAX_DYNAMIC_RULES) break;
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5s snappy fail-fast
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
 
-        for (let line of lines) {
-          line = line.trim();
-          if (!line || line.startsWith('#') || line.startsWith('!')) continue;
+        if (response.ok) {
+          const text = await response.text();
+          const lines = text.split('\n');
+          let fromThisFeed = 0;
 
-          // Parse hosts format: "0.0.0.0 domain.com" or "127.0.0.1 domain.com" or plain domain
-          const parts = line.split(/\s+/);
-          let domain = '';
-          if (parts.length >= 2 && (parts[0] === '0.0.0.0' || parts[0] === '127.0.0.1')) {
-            domain = parts[1].trim().toLowerCase();
-          } else if (parts.length === 1 && !line.includes(' ')) {
-            domain = parts[0].trim().toLowerCase();
-          }
+          for (let line of lines) {
+            line = line.trim();
+            if (!line || line.startsWith('#') || line.startsWith('!')) continue;
 
-          // Validate domain format: strict RFC compliant domain labels
-          if (domain && domain !== 'localhost' && domain.includes('.') && !domain.startsWith('.')) {
-            domain = domain.replace(/[\^$|]/g, '');
-            if (/^(?!-)[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i.test(domain)) {
-              const isProtected = PROTECTED_INFRA_DOMAINS.some(p => domain === p || domain.endsWith('.' + p));
-              if (!isProtected && !fetchedDomains.has(domain)) {
-                fetchedDomains.add(domain);
-                fromThisFeed++;
+            const parts = line.split(/\s+/);
+            let domain = '';
+            if (parts.length >= 2 && (parts[0] === '0.0.0.0' || parts[0] === '127.0.0.1')) {
+              domain = parts[1].trim().toLowerCase();
+            } else if (parts.length === 1 && !line.includes(' ')) {
+              domain = parts[0].trim().toLowerCase();
+            }
+
+            if (domain && domain !== 'localhost' && domain.includes('.') && !domain.startsWith('.')) {
+              domain = domain.replace(/[\^$|]/g, '');
+              if (/^(?!-)[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i.test(domain)) {
+                if (!isDomainProtected(domain) && !fetchedDomains.has(domain)) {
+                  fetchedDomains.add(domain);
+                  fromThisFeed++;
+                }
               }
             }
+
+            if (fetchedDomains.size >= MAX_DYNAMIC_RULES) break;
           }
 
-          // Cap at MAX_DYNAMIC_RULES to keep DNR blazing fast
-          if (fetchedDomains.size >= MAX_DYNAMIC_RULES) break;
+          console.log(`[SpeedShield] Live feed retrieved ${fromThisFeed} domains from ${url} (Total active: ${fetchedDomains.size})`);
         }
-
-        console.log(`[SpeedShield] Live feed retrieved ${fromThisFeed} domains from ${url} (Total active: ${fetchedDomains.size})`);
+      } catch (err) {
+        console.warn(`[SpeedShield] Source feed notice (${url}):`, err.message);
       }
-    } catch (err) {
-      console.warn(`[SpeedShield] Source feed notice (${url}):`, err.message);
     }
-  }
 
-  // Include user custom blocked domains
-  try {
-    const storageData = await chrome.storage.local.get(['custom_blocked_domains']);
-    const customDomains = storageData.custom_blocked_domains || [];
-    for (const d of customDomains) {
-      if (d && d.trim()) fetchedDomains.add(d.trim().toLowerCase());
-    }
-  } catch (e) {}
-
-  if (fetchedDomains.size > 0) {
-    // Convert to DeclarativeNetRequest dynamic rules
-    const newRules = [];
-    let ruleId = DYNAMIC_RULE_START_ID;
-
-    for (const domain of fetchedDomains) {
-      newRules.push({
-        id: ruleId++,
-        priority: 2,
-        action: { type: 'block' },
-        condition: {
-          urlFilter: '||' + domain + '^',
-          resourceTypes: [
-            'sub_frame', 'stylesheet', 'script', 'image', 'font',
-            'object', 'xmlhttprequest', 'ping', 'csp_report', 'media', 'websocket', 'other'
-          ]
+    // Include user custom blocked domains
+    try {
+      const storageData = await chrome.storage.local.get(['custom_blocked_domains']);
+      const customDomains = storageData.custom_blocked_domains || [];
+      for (const d of customDomains) {
+        if (d && d.trim() && !isDomainProtected(d.trim().toLowerCase())) {
+          fetchedDomains.add(d.trim().toLowerCase());
         }
+      }
+    } catch (e) {}
+
+    if (fetchedDomains.size > 0) {
+      const newRules = [];
+      let ruleId = DYNAMIC_RULE_START_ID;
+
+      for (const domain of fetchedDomains) {
+        newRules.push({
+          id: ruleId++,
+          priority: 2,
+          action: { type: 'block' },
+          condition: {
+            urlFilter: '||' + domain + '^',
+            resourceTypes: [
+              'sub_frame', 'stylesheet', 'script', 'image', 'font',
+              'object', 'xmlhttprequest', 'ping', 'csp_report', 'media', 'websocket', 'other'
+            ]
+          }
+        });
+      }
+
+      const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
+      const removeRuleIds = existingRules.map(r => r.id);
+
+      await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds,
+        addRules: newRules
       });
+
+      const now = Date.now();
+      await chrome.storage.local.set({
+        last_updated: now,
+        dynamic_rules_count: newRules.length,
+        dynamic_cosmetic_selectors: MODERN_COSMETIC_SELECTORS
+      });
+
+      console.log(`[SpeedShield] Auto-update complete: ${newRules.length} dynamic ad/tracker rules active.`);
+      return { success: true, count: newRules.length, timestamp: now };
+    } else {
+      console.log('[SpeedShield] Retaining active filter set.');
+      const stored = await chrome.storage.local.get(['dynamic_rules_count', 'last_updated']);
+      return {
+        success: true,
+        count: stored.dynamic_rules_count || 0,
+        timestamp: stored.last_updated || Date.now()
+      };
     }
-
-    // Safely replace existing dynamic rules
-    const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
-    const removeRuleIds = existingRules.map(r => r.id);
-
-    await chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds,
-      addRules: newRules
-    });
-
-    const now = Date.now();
-    await chrome.storage.local.set({
-      last_updated: now,
-      dynamic_rules_count: newRules.length,
-      dynamic_cosmetic_selectors: MODERN_COSMETIC_SELECTORS
-    });
-
-    console.log(`[SpeedShield] Auto-update complete: ${newRules.length} dynamic ad/tracker rules active.`);
-    return { success: true, count: newRules.length, timestamp: now };
-  } else {
-    console.log('[SpeedShield] Network offline or feed unchanged; retaining active filter set.');
-    const stored = await chrome.storage.local.get(['dynamic_rules_count', 'last_updated']);
-    return {
-      success: true,
-      count: stored.dynamic_rules_count || 0,
-      timestamp: stored.last_updated || Date.now()
-    };
+  } finally {
+    isUpdating = false;
   }
 }
 
