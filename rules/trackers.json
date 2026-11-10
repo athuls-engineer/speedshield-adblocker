@@ -3262,5 +3262,797 @@
         "other"
       ]
     }
+  },
+  {
+    "id": 2196,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||click.googleanalytics.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2197,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||freshmarketer.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2198,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||claritybt.freshmarketer.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2199,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||fwtracks.freshmarketer.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2200,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||notify.bugsnag.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2201,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||sessions.bugsnag.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2202,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||api.bugsnag.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2203,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||app.bugsnag.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2204,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||browser.sentry-cdn.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2205,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||app.getsentry.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2206,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||analytics.pointdrive.linkedin.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2207,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||trk.pinterest.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2208,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||analytics-sg.tiktok.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2209,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||log.byteoversea.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2210,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||analytics.yahoo.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2211,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||geo.yahoo.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2212,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||udcm.yahoo.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2213,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||analytics.query.yahoo.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2214,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||log.fc.yahoo.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2215,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||extmaps-api.yandex.net^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2216,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||appmetrica.yandex.ru^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2217,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||adfstat.yandex.ru^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2218,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||metrika.yandex.ru^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2219,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||iot-eu-logser.realme.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2220,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||iot-logser.realme.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2221,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||data.mistat.xiaomi.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2222,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||data.mistat.india.xiaomi.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2223,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||data.mistat.rus.xiaomi.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2224,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||tracking.rus.miui.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2225,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||metrics.data.hicloud.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2226,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||metrics2.data.hicloud.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2227,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||grs.hicloud.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2228,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||logservice.hicloud.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2229,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||logservice1.hicloud.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2230,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||logbak.hicloud.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2231,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||click.oneplus.cn^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2232,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||smetrics.samsung.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2233,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||nmetrics.samsung.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2234,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||analytics-api.samsunghealthcn.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2235,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||metrics.icloud.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2236,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||metrics.mzstatic.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2237,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||books-analytics-events.apple.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2238,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||weather-analytics-events.apple.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2239,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||notes-analytics-events.apple.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "other"
+      ]
+    }
   }
 ]

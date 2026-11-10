@@ -9345,5 +9345,545 @@
         "other"
       ]
     }
+  },
+  {
+    "id": 1418,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "*/widget/ads.js",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1419,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "*/pagead.js",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1420,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||adtago.s3.amazonaws.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1421,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||analyticsengine.s3.amazonaws.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1422,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||analytics.s3.amazonaws.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1423,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||advice-ads.s3.amazonaws.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1424,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||an.facebook.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1425,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads-api.twitter.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1426,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads.linkedin.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1427,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads.pinterest.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1428,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads.youtube.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1429,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads-api.tiktok.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1430,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads-sg.tiktok.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1431,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads.tiktok.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1432,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads.yahoo.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1433,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||partnerads.ysm.yahoo.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1434,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||gemini.yahoo.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1435,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||adtech.yahooinc.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1436,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||offerwall.yandex.net^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1437,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||adfox.yandex.ru^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1438,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||bdapi-ads.realmemobile.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1439,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||bdapi-in-ads.realmemobile.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1440,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||api.ad.xiaomi.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1441,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||sdkconfig.ad.xiaomi.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1442,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||sdkconfig.ad.intl.xiaomi.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1443,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||adsfs.oppomobile.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1444,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||adx.ads.oppomobile.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1445,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ck.ads.oppomobile.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1446,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||data.ads.oppomobile.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1447,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||samsungads.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1448,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||iadsdk.apple.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 1449,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||api-adservices.apple.com^",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "image",
+        "other"
+      ]
+    }
   }
 ]

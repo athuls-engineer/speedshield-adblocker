@@ -126,6 +126,18 @@
 
     // Base selectors
     const BASE_SELECTORS = [
+      '#cts_test',
+      '#ad_ctd',
+      '.textads',
+      '.adsbox',
+      '.banner_ads',
+      '.banner-ads',
+      '.adbox',
+      '.ADBox',
+      '.adbox-wrapper',
+      '.adSocial',
+      '.afs_ads',
+      '.ad-space',
       'ins.adsbygoogle',
       '[id^="google_ads_"]',
       '[id^="div-gpt-ad"]',
