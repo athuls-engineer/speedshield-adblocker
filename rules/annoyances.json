@@ -558,5 +558,55 @@
         "other"
       ]
     }
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||privacyportal.onetrust.com^"
+    },
+    "id": 5035
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||cookiebot.com^"
+    },
+    "id": 5036
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||cdn.privacy-mgmt.com^"
+    },
+    "id": 5037
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||cmp.usercentrics.eu^"
+    },
+    "id": 5038
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||sourcepoint.mgr.consensu.org^"
+    },
+    "id": 5039
   }
 ]

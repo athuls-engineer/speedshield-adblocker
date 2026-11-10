@@ -40,14 +40,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "*://*.googletagmanager.com/gtm.js",
-      "resourceTypes": [
-        "script",
-        "xmlhttprequest",
-        "ping",
-        "image",
-        "other"
-      ]
+      "urlFilter": "||googletagmanager.com^"
     }
   },
   {
@@ -4054,5 +4047,926 @@
         "other"
       ]
     }
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||tagmanager.google.com^"
+    },
+    "id": 2240
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||www.googletagmanager.com^"
+    },
+    "id": 2241
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||analytics.adobe.io^"
+    },
+    "id": 2242
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||metrics.adobe.com^"
+    },
+    "id": 2243
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||quantcast.com^"
+    },
+    "id": 2244
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||static.cloudflareinsights.com^"
+    },
+    "id": 2245
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||cloudflareinsights.com^"
+    },
+    "id": 2246
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||app.posthog.com^"
+    },
+    "id": 2247
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||eu.posthog.com^"
+    },
+    "id": 2248
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||us.i.posthog.com^"
+    },
+    "id": 2249
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||rudderstack.com^"
+    },
+    "id": 2250
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||cdn.rudderlabs.com^"
+    },
+    "id": 2251
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||snowplowanalytics.com^"
+    },
+    "id": 2252
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||tracker.snowplowanalytics.com^"
+    },
+    "id": 2253
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||fingerprintjs.com^"
+    },
+    "id": 2254
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||cdn.permutive.com^"
+    },
+    "id": 2255
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||onetag-sys.com^"
+    },
+    "id": 2256
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||pippio.com^"
+    },
+    "id": 2257
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||id5-sync.com^"
+    },
+    "id": 2258
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||prod.uidapi.com^"
+    },
+    "id": 2259
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||bnc.lt^"
+    },
+    "id": 2260
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||wzrkt.com^"
+    },
+    "id": 2261
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ingest.sentry.io^"
+    },
+    "id": 2262
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||o0.ingest.sentry.io^"
+    },
+    "id": 2263
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||bam-cell.nr-data.net^"
+    },
+    "id": 2264
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||cdn.lr-ingest.com^"
+    },
+    "id": 2265
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||r.lr-ingest.com^"
+    },
+    "id": 2266
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||graph.facebook.com^",
+      "excludedInitiatorDomains": [
+        "facebook.com",
+        "instagram.com",
+        "messenger.com"
+      ]
+    },
+    "id": 2267
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||tr.facebook.com^"
+    },
+    "id": 2268
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||graph.instagram.com^",
+      "excludedInitiatorDomains": [
+        "instagram.com"
+      ]
+    },
+    "id": 2269
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||i.instagram.com^",
+      "excludedInitiatorDomains": [
+        "instagram.com"
+      ]
+    },
+    "id": 2270
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads.snapchat.com^"
+    },
+    "id": 2271
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||sc-analytics.appspot.com^"
+    },
+    "id": 2272
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads-api.x.com^"
+    },
+    "id": 2273
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||analytics.x.com^"
+    },
+    "id": 2274
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads.x.com^"
+    },
+    "id": 2275
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||pixel.redditmedia.com^"
+    },
+    "id": 2276
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||d.reddit.com^"
+    },
+    "id": 2277
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||mon.byteoversea.com^"
+    },
+    "id": 2278
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||mcs-va.tiktokv.com^"
+    },
+    "id": 2279
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||mon.tiktokv.com^"
+    },
+    "id": 2280
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||analytics.pinterest.com^"
+    },
+    "id": 2281
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||widgets.pinterest.com^"
+    },
+    "id": 2282
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||pixel.quora.com^"
+    },
+    "id": 2283
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||qevents.quora.com^"
+    },
+    "id": 2284
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||px.srvcs.tumblr.com^"
+    },
+    "id": 2285
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads.vk.com^"
+    },
+    "id": 2286
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||vk.com/rtrg^"
+    },
+    "id": 2287
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ad.mail.ru^"
+    },
+    "id": 2288
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||top-fwz1.mail.ru^"
+    },
+    "id": 2289
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||advertising.apple.com^"
+    },
+    "id": 2290
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||metrics.apple.com^"
+    },
+    "id": 2291
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||xp.apple.com^"
+    },
+    "id": 2292
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||open.oneplus.net^"
+    },
+    "id": 2293
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads.huawei.com^"
+    },
+    "id": 2294
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||globalapi.ad.xiaomi.com^"
+    },
+    "id": 2295
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||tracking.miui.com^"
+    },
+    "id": 2296
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||adlog.vivo.com^"
+    },
+    "id": 2297
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads-api.vivo.com^"
+    },
+    "id": 2298
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||a.lenovo.com^"
+    },
+    "id": 2299
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||us.info.lgsmartad.com^"
+    },
+    "id": 2300
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||us.ibs.lgappstv.com^"
+    },
+    "id": 2301
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ad.lgappstv.com^"
+    },
+    "id": 2302
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||info.lgsmartad.com^"
+    },
+    "id": 2303
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ngfts.lge.com^"
+    },
+    "id": 2304
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||yumenetworks.com^"
+    },
+    "id": 2305
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||smartclip.com^"
+    },
+    "id": 2306
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||settings-win.data.microsoft.com^"
+    },
+    "id": 2307
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||vortex.data.microsoft.com^"
+    },
+    "id": 2308
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||vortex-win.data.microsoft.com^"
+    },
+    "id": 2309
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||watson.telemetry.microsoft.com^"
+    },
+    "id": 2310
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||telemetry.microsoft.com^"
+    },
+    "id": 2311
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||browser.events.data.msn.com^"
+    },
+    "id": 2312
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||device-metrics-us.amazon.com^"
+    },
+    "id": 2313
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||device-metrics-us-2.amazon.com^"
+    },
+    "id": 2314
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||mads-eu.amazon.com^"
+    },
+    "id": 2315
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||logs.roku.com^"
+    },
+    "id": 2316
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads.roku.com^"
+    },
+    "id": 2317
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||amoeba.web.roku.com^"
+    },
+    "id": 2318
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads.vizio.com^"
+    },
+    "id": 2319
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||tvinteractive.tv^"
+    },
+    "id": 2320
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||tvpixel.com^"
+    },
+    "id": 2321
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||firebase-settings.crashlytics.com^"
+    },
+    "id": 2322
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||events.launchdarkly.com^"
+    },
+    "id": 2323
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||clientstream.launchdarkly.com^"
+    },
+    "id": 2324
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||list-manage.com^"
+    },
+    "id": 2325
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||track.hubspot.com^"
+    },
+    "id": 2326
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||munchkin.marketo.net^"
+    },
+    "id": 2327
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||click.mailchimp.com^"
+    },
+    "id": 2328
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||static.klaviyo.com^"
+    },
+    "id": 2329
+  },
+  {
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||a.klaviyo.com^"
+    },
+    "id": 2330
   }
 ]
