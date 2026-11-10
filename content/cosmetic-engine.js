@@ -135,6 +135,8 @@
       '.adbox',
       '.ADBox',
       '.adbox-wrapper',
+      '.ad-wrapper',
+      '.ad-banner',
       '.adSocial',
       '.afs_ads',
       '.ad-space',

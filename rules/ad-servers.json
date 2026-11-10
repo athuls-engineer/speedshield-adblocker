@@ -10359,5 +10359,135 @@
       "urlFilter": "||metrics.brightcove.com^"
     },
     "id": 1496
+  },
+  {
+    "id": 1497,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||wl.spotify.com/adtrack^"
+    }
+  },
+  {
+    "id": 1498,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads.iheart.com^"
+    }
+  },
+  {
+    "id": 1499,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads.soundcloud.com^"
+    }
+  },
+  {
+    "id": 1500,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads.deezer.com^"
+    }
+  },
+  {
+    "id": 1501,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||ads.tritondigital.com^"
+    }
+  },
+  {
+    "id": 1502,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||synchroscript.adswizz.com^"
+    }
+  },
+  {
+    "id": 1503,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||adsserver.megaphone.fm^"
+    }
+  },
+  {
+    "id": 1504,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||imasdk.googleapis.com^"
+    }
+  },
+  {
+    "id": 1505,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||vid.vidyard.com/ads^"
+    }
+  },
+  {
+    "id": 1506,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||widget.zemanta.com^"
+    }
+  },
+  {
+    "id": 1507,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||s.ntv.io^"
+    }
+  },
+  {
+    "id": 1508,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||admob.googleapis.com^"
+    }
+  },
+  {
+    "id": 1509,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||net.rayjump.com^"
+    }
   }
 ]

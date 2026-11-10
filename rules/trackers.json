@@ -4968,5 +4968,35 @@
       "urlFilter": "||a.klaviyo.com^"
     },
     "id": 2330
+  },
+  {
+    "id": 2331,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||www.redditstatic.com/ads^"
+    }
+  },
+  {
+    "id": 2332,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||cdn.imrworldwide.com^"
+    }
+  },
+  {
+    "id": 2333,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||idsync.drawbrid.ge^"
+    }
   }
 ]
